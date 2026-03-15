@@ -1,0 +1,329 @@
+[2026-03-15T16:45:41.826Z] INFO  Jarvis starting up...
+[2026-03-15T16:45:41.830Z] INFO  Database initialized at /Users/abhi/Documents/jarvis/jarvis.db
+[2026-03-15T16:45:41.917Z] INFO  WhatsApp: using WA version 2.3000.1033846690
+[2026-03-15T16:45:41.922Z] INFO  Jarvis is running. Scan the QR code with WhatsApp to connect.
+[2026-03-15T16:45:43.889Z] INFO  WhatsApp: connected successfully ✅
+[2026-03-15T16:46:33.351Z] INFO  Received SIGTERM. Shutting down gracefully...
+[2026-03-15T16:46:35.452Z] INFO  Jarvis starting up...
+[2026-03-15T16:46:35.456Z] INFO  Database initialized at /Users/abhi/Documents/jarvis/jarvis.db
+[2026-03-15T16:46:35.549Z] INFO  WhatsApp: using WA version 2.3000.1033846690
+[2026-03-15T16:46:35.554Z] INFO  Jarvis is running. Scan the QR code with WhatsApp to connect.
+[2026-03-15T16:46:36.935Z] INFO  WhatsApp: connected successfully ✅
+[2026-03-15T16:47:03.638Z] INFO  WhatsApp: messages.upsert fired — type=notify, count=1
+[2026-03-15T16:48:10.881Z] INFO  Received SIGTERM. Shutting down gracefully...
+[2026-03-15T16:48:13.202Z] INFO  Jarvis starting up...
+[2026-03-15T16:48:13.205Z] INFO  Database initialized at /Users/abhi/Documents/jarvis/jarvis.db
+[2026-03-15T16:48:13.286Z] INFO  WhatsApp: using WA version 2.3000.1033846690
+[2026-03-15T16:48:13.291Z] INFO  Jarvis is running. Scan the QR code with WhatsApp to connect.
+[2026-03-15T16:48:14.731Z] INFO  WhatsApp: connected successfully ✅
+[2026-03-15T16:48:39.879Z] INFO  WhatsApp: messages.upsert fired — type=notify, count=1
+[2026-03-15T16:48:39.880Z] INFO  WhatsApp: msg from jid=101580338675805@lid, fromMe=true, msgType=conversation
+[2026-03-15T16:48:39.880Z] INFO  WhatsApp: skipping fromMe message (not self-chat). myJid=918521698529
+[2026-03-15T16:49:31.179Z] INFO  Received SIGTERM. Shutting down gracefully...
+[2026-03-15T16:49:33.279Z] INFO  Jarvis starting up...
+[2026-03-15T16:49:33.283Z] INFO  Database initialized at /Users/abhi/Documents/jarvis/jarvis.db
+[2026-03-15T16:49:33.359Z] INFO  WhatsApp: using WA version 2.3000.1033846690
+[2026-03-15T16:49:33.365Z] INFO  Jarvis is running. Scan the QR code with WhatsApp to connect.
+[2026-03-15T16:49:35.014Z] INFO  WhatsApp: connected successfully ✅
+[2026-03-15T16:52:12.939Z] INFO  WhatsApp: messages.upsert fired — type=notify, count=1
+[2026-03-15T16:52:12.939Z] INFO  WhatsApp: msg from jid=101580338675805@lid, fromMe=true, msgType=conversation
+[2026-03-15T16:52:12.940Z] INFO  WhatsApp: processing self-chat message from 101580338675805@lid
+[2026-03-15T16:52:12.940Z] INFO  WhatsApp message from 101580338675805@lid: Hi
+[2026-03-15T16:52:12.940Z] INFO  Owner JID set to: 101580338675805@lid
+[2026-03-15T16:52:12.940Z] INFO  Scheduler: started (every 30 min) for owner 101580338675805@lid
+[2026-03-15T16:52:12.941Z] INFO  Agent round 1/5
+[2026-03-15T16:52:12.942Z] INFO  Calling Groq 70B...
+[2026-03-15T16:52:13.300Z] INFO  Groq 70B responded (text only)
+[2026-03-15T16:52:13.301Z] INFO  WhatsApp: sending response to 101580338675805@lid (91 chars)
+[2026-03-15T16:52:14.817Z] INFO  WhatsApp: response sent successfully
+[2026-03-15T16:52:39.300Z] INFO  WhatsApp: messages.upsert fired — type=append, count=1
+[2026-03-15T16:52:39.301Z] INFO  WhatsApp: skipping non-notify upsert (type=append)
+[2026-03-15T16:54:11.039Z] INFO  WhatsApp: messages.upsert fired — type=notify, count=1
+[2026-03-15T16:54:11.041Z] INFO  WhatsApp: msg from jid=101580338675805@lid, fromMe=true, msgType=conversation
+[2026-03-15T16:54:11.041Z] INFO  WhatsApp: processing self-chat message from 101580338675805@lid
+[2026-03-15T16:54:11.041Z] INFO  WhatsApp message from 101580338675805@lid: Hi
+[2026-03-15T16:54:11.043Z] INFO  Agent round 1/5
+[2026-03-15T16:54:11.043Z] INFO  Calling Groq 70B...
+[2026-03-15T16:54:11.177Z] WARN  Groq 70B failed: 429 {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8nf8wfej3r2qd0ttw5nart` service tier `on_dema
+[2026-03-15T16:54:11.178Z] INFO  Calling Claude (paid, tool-capable fallback)...
+[2026-03-15T16:54:13.115Z] INFO  Claude tokens: 2446 in / 17 out | $0.0076
+[2026-03-15T16:54:13.116Z] INFO  Claude responded (text only)
+[2026-03-15T16:54:13.116Z] INFO  WhatsApp: sending response to 101580338675805@lid (98 chars)
+[2026-03-15T16:54:13.124Z] INFO  WhatsApp: response sent successfully
+[2026-03-15T16:54:54.556Z] INFO  WhatsApp: messages.upsert fired — type=append, count=1
+[2026-03-15T16:54:54.558Z] INFO  WhatsApp: skipping non-notify upsert (type=append)
+[2026-03-15T16:55:20.845Z] INFO  Received SIGTERM. Shutting down gracefully...
+[2026-03-15T16:55:22.862Z] INFO  Jarvis starting up...
+[2026-03-15T16:55:22.865Z] INFO  Database initialized at /Users/abhi/Documents/jarvis/jarvis.db
+[2026-03-15T16:55:22.952Z] INFO  WhatsApp: using WA version 2.3000.1033846690
+[2026-03-15T16:55:22.958Z] INFO  Jarvis is running. Scan the QR code with WhatsApp to connect.
+[2026-03-15T16:55:24.447Z] INFO  WhatsApp: connected successfully ✅
+[2026-03-15T16:57:26.538Z] INFO  WhatsApp: messages.upsert fired — type=notify, count=1
+[2026-03-15T16:57:26.539Z] INFO  WhatsApp: msg from jid=101580338675805@lid, fromMe=true, msgType=conversation
+[2026-03-15T16:57:26.539Z] INFO  WhatsApp: processing self-chat message from 101580338675805@lid
+[2026-03-15T16:57:26.539Z] INFO  WhatsApp: LID detected, will reply to 918521698529@s.whatsapp.net instead of 101580338675805@lid
+[2026-03-15T16:57:26.539Z] INFO  WhatsApp message from 101580338675805@lid: Hi
+[2026-03-15T16:57:26.540Z] INFO  Owner JID set to: 918521698529@s.whatsapp.net
+[2026-03-15T16:57:26.540Z] INFO  Scheduler: started (every 30 min) for owner 918521698529@s.whatsapp.net
+[2026-03-15T16:57:26.541Z] INFO  Agent round 1/5
+[2026-03-15T16:57:26.541Z] INFO  Calling Groq 70B...
+[2026-03-15T16:57:26.660Z] WARN  Groq 70B failed: 429 {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8nf8wfej3r2qd0ttw5nart` service tier `on_dema
+[2026-03-15T16:57:26.660Z] INFO  Calling Claude (paid, tool-capable fallback)...
+[2026-03-15T16:57:28.267Z] INFO  Claude tokens: 2590 in / 16 out | $0.0080
+[2026-03-15T16:57:28.267Z] INFO  Claude responded (text only)
+[2026-03-15T16:57:28.268Z] INFO  WhatsApp: sending response to 918521698529@s.whatsapp.net (89 chars)
+[2026-03-15T16:57:28.570Z] INFO  WhatsApp: response sent successfully
+[2026-03-15T16:57:29.161Z] INFO  WhatsApp: messages.upsert fired — type=append, count=1
+[2026-03-15T16:57:29.161Z] INFO  WhatsApp: skipping non-notify upsert (type=append)
+Failed to decrypt message with any known session...
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:250:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async SessionCipher.decryptWithSessions (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 101580338675805.0 [as awaitable] (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:250:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async SessionCipher.decryptWithSessions (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 101580338675805.0 [as awaitable] (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:250:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async SessionCipher.decryptWithSessions (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 101580338675805.0 [as awaitable] (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:250:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async SessionCipher.decryptWithSessions (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 101580338675805.0 [as awaitable] (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/queue_job.js:20:29)
+[2026-03-15T16:58:35.435Z] INFO  WhatsApp: messages.upsert fired — type=notify, count=1
+[2026-03-15T16:58:35.437Z] INFO  WhatsApp: message has no content, skipping
+[2026-03-15T16:58:41.173Z] INFO  WhatsApp: messages.upsert fired — type=notify, count=1
+[2026-03-15T16:58:41.173Z] INFO  WhatsApp: msg from jid=918521698529@s.whatsapp.net, fromMe=true, msgType=protocolMessage
+[2026-03-15T16:58:41.174Z] INFO  WhatsApp: processing self-chat message from 918521698529@s.whatsapp.net
+[2026-03-15T16:58:41.174Z] INFO  WhatsApp: empty text body, skipping. Keys: protocolMessage
+Failed to decrypt message with any known session...
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 101580338675805.0 [as awaitable] (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 101580338675805.0 [as awaitable] (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 101580338675805.0 [as awaitable] (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 101580338675805.0 [as awaitable] (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/abhi/Documents/jarvis/node_modules/libsignal/src/queue_job.js:20:29)
+[2026-03-15T16:58:41.181Z] INFO  WhatsApp: messages.upsert fired — type=notify, count=1
+[2026-03-15T16:58:41.181Z] INFO  WhatsApp: message has no content, skipping
+[2026-03-15T16:58:41.674Z] INFO  WhatsApp: messages.upsert fired — type=notify, count=1
+[2026-03-15T16:58:41.674Z] INFO  WhatsApp: msg from jid=918521698529@s.whatsapp.net, fromMe=true, msgType=conversation,messageContextInfo
+[2026-03-15T16:58:41.675Z] INFO  WhatsApp: processing self-chat message from 918521698529@s.whatsapp.net
+[2026-03-15T16:58:41.675Z] INFO  WhatsApp message from 918521698529@s.whatsapp.net: Find my LinkedIn connection Jai priyadarshi and text him " hi I am abhi " on LinkedIn
+[2026-03-15T16:58:41.677Z] INFO  Agent round 1/5
+[2026-03-15T16:58:41.677Z] INFO  Calling Groq 70B...
+[2026-03-15T16:58:41.771Z] WARN  Groq 70B failed: 429 {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8nf8wfej3r2qd0ttw5nart` service tier `on_dema
+[2026-03-15T16:58:41.772Z] INFO  Calling Claude (paid, tool-capable fallback)...
+Closing open session in favor of incoming prekey bundle
+Closing session: SessionEntry {
+  _chains: {
+    'BSvK/SI1nMmxry42MYbbYM2DZVPE4AaL6o37vf/kx8dy': { chainKey: [Object], chainType: 2, messageKeys: {} },
+    'BYQKqYr4+22i2fSweGlii81oYut5n9hv6ZCYYTgeHLIp': { chainKey: [Object], chainType: 2, messageKeys: {} },
+    BUJUXpaR5sv2PqbGJ6ywIEVLx0Qbv0vweV9T1jZ006Rd: { chainKey: [Object], chainType: 2, messageKeys: {} },
+    'BU4TEDjCfWRHkpPZ4MdUIt44y+1nmgR8d416AhYW4hh7': { chainKey: [Object], chainType: 1, messageKeys: {} }
+  },
+  registrationId: 913451735,
+  currentRatchet: {
+    ephemeralKeyPair: {
+      pubKey: <Buffer 05 4e 13 10 38 c2 7d 64 47 92 93 d9 e0 c7 54 22 de 38 cb ed 67 9a 04 7c 77 8d 7a 02 16 16 e2 18 7b>,
+      privKey: <Buffer 88 eb 36 fd 89 3b 49 08 66 09 05 20 58 68 04 54 73 6a 36 87 51 bb 2b 9b ab 6c d6 0e e6 f9 25 51>
+    },
+    lastRemoteEphemeralKey: <Buffer 05 42 54 5e 96 91 e6 cb f6 3e a6 c6 27 ac b0 20 45 4b c7 44 1b bf 4b f0 79 5f 53 d6 36 74 d3 a4 5d>,
+    previousCounter: 1,
+    rootKey: <Buffer b9 13 f5 b5 08 0e 41 7d fe 86 af 48 6e 2f e8 de 25 b6 01 e2 9d 1b 17 e9 bf e7 09 8d b1 cd 1e 64>
+  },
+  indexInfo: {
+    baseKey: <Buffer 05 5d bd 83 bf 54 5d 23 29 9b a1 c4 8b 10 d7 0e 65 ae 93 05 72 fa bb 68 98 f6 2b 3a ba d8 42 88 38>,
+    baseKeyType: 2,
+    closed: -1,
+    used: 1773593846531,
+    created: 1773592803624,
+    remoteIdentityKey: <Buffer 05 5b 7a 0b 0c a0 8b 37 20 d1 6c 19 93 15 87 c0 6d 6f a1 04 fc 01 79 40 80 2a 77 07 d1 9e d5 97 58>
+  }
+}
+[2026-03-15T16:58:41.899Z] INFO  WhatsApp: messages.upsert fired — type=notify, count=1
+[2026-03-15T16:58:41.900Z] INFO  WhatsApp: msg from jid=101580338675805@lid, fromMe=true, msgType=conversation
+[2026-03-15T16:58:41.900Z] INFO  WhatsApp: processing self-chat message from 101580338675805@lid
+[2026-03-15T16:58:41.901Z] INFO  WhatsApp: LID detected, will reply to 918521698529@s.whatsapp.net instead of 101580338675805@lid
+[2026-03-15T16:58:41.901Z] INFO  WhatsApp message from 101580338675805@lid: Find my LinkedIn connection Jai priyadarshi and text him " hi I am abhi " on LinkedIn
+[2026-03-15T16:58:41.902Z] INFO  Agent round 1/5
+[2026-03-15T16:58:41.902Z] INFO  Calling Groq 70B...
+[2026-03-15T16:58:41.972Z] WARN  Groq 70B failed: 429 {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8nf8wfej3r2qd0ttw5nart` service tier `on_dema
+[2026-03-15T16:58:41.973Z] INFO  Calling Claude (paid, tool-capable fallback)...
+[2026-03-15T16:58:44.924Z] INFO  Claude tokens: 2677 in / 112 out | $0.0097
+[2026-03-15T16:58:44.925Z] INFO  Claude responded with 1 tool call(s)
+[2026-03-15T16:58:44.926Z] INFO  Executing tool: linkedin_search {"query":"Jai priyadarshi","max_results":5}
+[2026-03-15T16:58:44.927Z] INFO  Launching persistent Chromium context...
+[2026-03-15T16:58:44.942Z] INFO  Claude tokens: 2653 in / 110 out | $0.0096
+[2026-03-15T16:58:44.942Z] INFO  Claude responded with 1 tool call(s)
+[2026-03-15T16:58:44.942Z] INFO  Executing tool: linkedin_search {"query":"Jai priyadarshi","max_results":5}
+[2026-03-15T16:58:44.942Z] INFO  Launching persistent Chromium context...
+[2026-03-15T16:58:45.791Z] INFO  Browser context ready
+[2026-03-15T16:58:45.792Z] INFO  Browser context ready
+[2026-03-15T16:58:45.795Z] ERROR Tool linkedin_search error: page.goto: net::ERR_ABORTED at https://www.linkedin.com/search/results/people/?keywords=Jai%20priyadarshi&origin=GLOBAL_SEARCH_HEADER
+Call log:
+  - navigating to "https://www.linkedin.com/search/results/people/?keywords=Jai%20priyadarshi&origin=GLOBAL_SEARCH_HEADER", waiting until "domcontentloaded"
+
+[2026-03-15T16:58:45.795Z] INFO  Tool linkedin_search result: Error in linkedin_search: page.goto: net::ERR_ABORTED at https://www.linkedin.com/search/results/people/?keywords=Jai%20priyadarshi&origin=GLOBAL_SEARCH_HEADER
+Call log:
+  - navigating to "https://www.linkedin.com/search/results/people/?keywords=Jai%20priyadarshi&origin=GLOBAL_SEARCH_HEADER", waitin
+[2026-03-15T16:58:45.795Z] INFO  Agent round 2/5
+[2026-03-15T16:58:45.795Z] INFO  Calling Groq 70B...
+[2026-03-15T16:58:45.835Z] WARN  Groq 70B failed: 429 {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8nf8wfej3r2qd0ttw5nart` service tier `on_dema
+[2026-03-15T16:58:45.835Z] INFO  Calling Claude (paid, tool-capable fallback)...
+[2026-03-15T16:58:47.697Z] INFO  Claude tokens: 2914 in / 52 out | $0.0095
+[2026-03-15T16:58:47.697Z] INFO  Claude responded with 1 tool call(s)
+[2026-03-15T16:58:47.697Z] INFO  Executing tool: linkedin_status {}
+[2026-03-15T16:58:52.385Z] INFO  Tool linkedin_status result: ✅ Logged in to LinkedIn
+[2026-03-15T16:58:52.385Z] INFO  Agent round 3/5
+[2026-03-15T16:58:52.385Z] INFO  Calling Groq 70B...
+[2026-03-15T16:58:52.522Z] WARN  Groq 70B failed: 429 {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8nf8wfej3r2qd0ttw5nart` service tier `on_dema
+[2026-03-15T16:58:52.522Z] INFO  Calling Claude (paid, tool-capable fallback)...
+[2026-03-15T16:58:54.452Z] INFO  Claude tokens: 2986 in / 79 out | $0.0101
+[2026-03-15T16:58:54.453Z] INFO  Claude responded with 1 tool call(s)
+[2026-03-15T16:58:54.453Z] INFO  Executing tool: linkedin_search {"query":"Jai Priyadarshi","max_results":10}
+[2026-03-15T16:58:55.397Z] ERROR Tool linkedin_search error: page.evaluate: Execution context was destroyed, most likely because of a navigation
+[2026-03-15T16:58:55.397Z] INFO  Tool linkedin_search result: Error in linkedin_search: page.evaluate: Execution context was destroyed, most likely because of a navigation
+[2026-03-15T16:58:55.397Z] INFO  Agent round 2/5
+[2026-03-15T16:58:55.397Z] INFO  Calling Groq 70B...
+[2026-03-15T16:58:55.449Z] WARN  Groq 70B failed: 429 {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8nf8wfej3r2qd0ttw5nart` service tier `on_dema
+[2026-03-15T16:58:55.450Z] INFO  Calling Claude (paid, tool-capable fallback)...
+[2026-03-15T16:58:57.727Z] INFO  Claude tokens: 2797 in / 50 out | $0.0091
+[2026-03-15T16:58:57.727Z] INFO  Claude responded with 1 tool call(s)
+[2026-03-15T16:58:57.727Z] INFO  Executing tool: linkedin_status {}
+[2026-03-15T16:59:02.600Z] INFO  Tool linkedin_status result: ✅ Logged in to LinkedIn
+[2026-03-15T16:59:02.600Z] INFO  Agent round 3/5
+[2026-03-15T16:59:02.600Z] INFO  Calling Groq 70B...
+[2026-03-15T16:59:02.729Z] WARN  Groq 70B failed: 429 {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8nf8wfej3r2qd0ttw5nart` service tier `on_dema
+[2026-03-15T16:59:02.729Z] INFO  Calling Claude (paid, tool-capable fallback)...
+[2026-03-15T16:59:03.326Z] INFO  LinkedIn search: Strategy A returned 0, trying Strategy B
+[2026-03-15T16:59:03.385Z] INFO  LinkedIn search for "Jai Priyadarshi": found 6 results
+[2026-03-15T16:59:03.385Z] INFO  Tool linkedin_search result: 1. *Abhi Raj*
+   🔗 https://www.linkedin.com/in/abhi-raj-a626a8228
+
+2. *Utkarsh Bajaj*
+   🔗 https://www.linkedin.com/in/utkarsh-bajaj
+
+3. *Swadesh Kumar*
+   🔗 https://www.linkedin.com/in/swadesh-kumar
+
+4. * Divya Porwal*
+   🔗 https://www.linkedin.com/in/-divya-porwal
+
+5. *ACoAADMz5tkB3y81DUwtI5oN
+[2026-03-15T16:59:03.386Z] INFO  Agent round 4/5
+[2026-03-15T16:59:03.386Z] INFO  Calling Groq 70B...
+[2026-03-15T16:59:03.453Z] WARN  Groq 70B failed: 429 {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8nf8wfej3r2qd0ttw5nart` service tier `on_dema
+[2026-03-15T16:59:03.453Z] INFO  Calling Claude (paid, tool-capable fallback)...
+[2026-03-15T16:59:04.702Z] INFO  Claude tokens: 2867 in / 78 out | $0.0098
+[2026-03-15T16:59:04.703Z] INFO  Claude responded with 1 tool call(s)
+[2026-03-15T16:59:04.703Z] INFO  Executing tool: linkedin_search {"query":"Jai priyadarshi","max_results":5}
+[2026-03-15T16:59:05.937Z] INFO  Claude tokens: 3339 in / 109 out | $0.0117
+[2026-03-15T16:59:05.937Z] INFO  Claude responded with 1 tool call(s)
+[2026-03-15T16:59:05.937Z] INFO  Executing tool: linkedin_search {"query":"Jai Priyadarshi","max_results":10}
+[2026-03-15T16:59:13.134Z] INFO  LinkedIn search: Strategy A returned 0, trying Strategy B
+[2026-03-15T16:59:13.144Z] INFO  LinkedIn search for "Jai priyadarshi": found 5 results
+[2026-03-15T16:59:13.144Z] INFO  Tool linkedin_search result: 1. *Jai Priyadarshi*
+   🔗 https://www.linkedin.com/in/jai-priyadarshi-b78867223
+
+2. *Sonawane*
+   🔗 https://www.linkedin.com/in/sonawane
+
+3. *Piyush Masrani*
+   🔗 https://www.linkedin.com/in/piyush-masrani
+
+4. *Jay Priyadarshi*
+   🔗 https://www.linkedin.com/in/jay-priyadarshi-3b8b46254
+
+5. *Khus
+[2026-03-15T16:59:13.145Z] INFO  Agent round 4/5
+[2026-03-15T16:59:13.145Z] INFO  Calling Groq 70B...
+[2026-03-15T16:59:13.280Z] WARN  Groq 70B failed: 429 {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8nf8wfej3r2qd0ttw5nart` service tier `on_dema
+[2026-03-15T16:59:13.280Z] INFO  Calling Claude (paid, tool-capable fallback)...
+[2026-03-15T16:59:15.216Z] INFO  LinkedIn search: Strategy A returned 0, trying Strategy B
+[2026-03-15T16:59:15.224Z] INFO  LinkedIn search for "Jai Priyadarshi": found 10 results
+[2026-03-15T16:59:15.224Z] INFO  Tool linkedin_search result: 1. *Jai Priyadarshi*
+   🔗 https://www.linkedin.com/in/jai-priyadarshi-b78867223
+
+2. *Sonawane*
+   🔗 https://www.linkedin.com/in/sonawane
+
+3. *Piyush Masrani*
+   🔗 https://www.linkedin.com/in/piyush-masrani
+
+4. *Jay Priyadarshi*
+   🔗 https://www.linkedin.com/in/jay-priyadarshi-3b8b46254
+
+5. *Khus
+[2026-03-15T16:59:15.224Z] INFO  Agent round 5/5
+[2026-03-15T16:59:15.225Z] INFO  Calling Groq 70B...
+[2026-03-15T16:59:15.303Z] WARN  Groq 70B failed: 429 {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8nf8wfej3r2qd0ttw5nart` service tier `on_dema
+[2026-03-15T16:59:15.304Z] INFO  Calling Claude (paid, tool-capable fallback)...
+[2026-03-15T16:59:16.719Z] INFO  Claude tokens: 3133 in / 118 out | $0.0112
+[2026-03-15T16:59:16.720Z] INFO  Claude responded with 1 tool call(s)
+[2026-03-15T16:59:16.720Z] INFO  Executing tool: linkedin_message {"profile_url":"https://www.linkedin.com/in/jai-priyadarshi-b78867223","message":"hi I am abhi"}
+[2026-03-15T16:59:16.723Z] INFO  LinkedIn: navigating to profile https://www.linkedin.com/in/jai-priyadarshi-b78867223
+[2026-03-15T16:59:17.817Z] INFO  Claude tokens: 3803 in / 128 out | $0.0133
+[2026-03-15T16:59:17.817Z] INFO  Claude responded with 1 tool call(s)
+[2026-03-15T16:59:17.818Z] INFO  Executing tool: linkedin_message {"profile_url":"https://www.linkedin.com/in/jai-priyadarshi-b78867223","message":" hi I am abhi "}
+[2026-03-15T16:59:17.818Z] INFO  LinkedIn: navigating to profile https://www.linkedin.com/in/jai-priyadarshi-b78867223
+[2026-03-15T16:59:22.052Z] INFO  LinkedIn: on page "Jai Priyadarshi | LinkedIn"
+[2026-03-15T16:59:23.103Z] INFO  LinkedIn: on page "Jai Priyadarshi | LinkedIn"
+[2026-03-15T16:59:24.097Z] INFO  LinkedIn: messaging overlay opened via profile button
+[2026-03-15T16:59:25.130Z] INFO  LinkedIn: messaging overlay opened via profile button
+[2026-03-15T16:59:29.476Z] INFO  LinkedIn: typed message using: .msg-form__contenteditable[contenteditable="true"]
+[2026-03-15T16:59:30.541Z] INFO  LinkedIn: clicked Send with: button.msg-form__send-button
+[2026-03-15T16:59:30.649Z] INFO  LinkedIn: typed message using: .msg-form__contenteditable[contenteditable="true"]
+[2026-03-15T16:59:31.720Z] INFO  LinkedIn: clicked Send with: button.msg-form__send-button
+[2026-03-15T16:59:32.544Z] INFO  LinkedIn: ✅ message sent to https://www.linkedin.com/in/jai-priyadarshi-b78867223. 14 messages remaining today.
+[2026-03-15T16:59:32.545Z] INFO  Tool linkedin_message result: ✅ Message sent to *https://www.linkedin.com/in/jai-priyadarshi-b78867223*. (14 messages left today)
+[2026-03-15T16:59:32.545Z] INFO  Agent round 5/5
+[2026-03-15T16:59:32.545Z] INFO  Calling Groq 70B...
+[2026-03-15T16:59:32.665Z] WARN  Groq 70B failed: 429 {"error":{"message":"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kh8nf8wfej3r2qd0ttw5nart` service tier `on_dema
+[2026-03-15T16:59:32.666Z] INFO  Calling Claude (paid, tool-capable fallback)...
+[2026-03-15T16:59:33.722Z] INFO  LinkedIn: ✅ message sent to https://www.linkedin.com/in/jai-priyadarshi-b78867223. 14 messages remaining today.
+[2026-03-15T16:59:33.723Z] INFO  Tool linkedin_message result: ✅ Message sent to *https://www.linkedin.com/in/jai-priyadarshi-b78867223*. (14 messages left today)
+[2026-03-15T16:59:33.724Z] INFO  WhatsApp: sending response to 918521698529@s.whatsapp.net (126 chars)
+[2026-03-15T16:59:33.738Z] INFO  WhatsApp: response sent successfully
+[2026-03-15T16:59:34.309Z] INFO  WhatsApp: messages.upsert fired — type=append, count=1
+[2026-03-15T16:59:34.310Z] INFO  WhatsApp: skipping non-notify upsert (type=append)
+[2026-03-15T16:59:34.819Z] INFO  Claude tokens: 3300 in / 45 out | $0.0106
+[2026-03-15T16:59:34.820Z] INFO  Claude responded (text only)
+[2026-03-15T16:59:34.820Z] INFO  WhatsApp: sending response to 918521698529@s.whatsapp.net (157 chars)
+[2026-03-15T16:59:34.827Z] INFO  WhatsApp: response sent successfully
+[2026-03-15T16:59:35.385Z] INFO  WhatsApp: messages.upsert fired — type=append, count=1
+[2026-03-15T16:59:35.386Z] INFO  WhatsApp: skipping non-notify upsert (type=append)
+[2026-03-15T17:00:16.434Z] INFO  WhatsApp: messages.upsert fired — type=notify, count=1
+[2026-03-15T17:00:16.435Z] INFO  WhatsApp: msg from jid=120363163332415492@g.us, fromMe=false, msgType=senderKeyDistributionMessage,messageContextInfo,extendedTextMessage
+[2026-03-15T17:00:16.435Z] INFO  WhatsApp: skipping group/broadcast/newsletter: 120363163332415492@g.us
