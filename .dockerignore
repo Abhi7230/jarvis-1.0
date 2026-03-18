@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.env
+.env.production
+.whatsapp_auth/
+.browser_data/
+data/
+.gmail_token.json
+gmail_credentials.json
+jarvis.db
+jarvis.db-wal
+jarvis.db-shm
+jarvis.log
+jarvis_stdout.log
+*.png
+.debug_*.png
+.git/
