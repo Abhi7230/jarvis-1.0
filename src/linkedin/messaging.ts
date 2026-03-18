@@ -1,4 +1,4 @@
-import { getPage } from '../controller';
+import { getPageForUser } from '../browser-pool';
 import {
   getContactedToday,
   isRecruiterContacted,
@@ -14,6 +14,7 @@ const DAILY_LIMIT = 15;
 export async function linkedinMessage(
   profileUrl: string,
   message: string,
+  userId: string = '__legacy__',
   recruiterName?: string,
   company?: string
 ): Promise<string> {
@@ -23,19 +24,19 @@ export async function linkedinMessage(
   }
 
   // Check daily limit
-  const todayCount = getContactedToday();
+  const todayCount = getContactedToday(userId);
   if (todayCount >= DAILY_LIMIT) {
     return `⚠️ Daily message limit reached (${todayCount}/${DAILY_LIMIT}). Try again tomorrow.`;
   }
 
   // Check dedup
-  if (isRecruiterContacted(profileUrl)) {
+  if (isRecruiterContacted(userId, profileUrl)) {
     return `Already contacted this recruiter: ${profileUrl}`;
   }
 
   try {
     log.info(`LinkedIn: navigating to profile ${profileUrl}`);
-    const page = await getPage(profileUrl);
+    const page = await getPageForUser(userId, profileUrl);
     await page.waitForTimeout(4000);
 
     if (page.url().includes('/login') || page.url().includes('/authwall')) {
@@ -277,12 +278,12 @@ export async function linkedinMessage(
     await page.waitForTimeout(2000);
 
     // Record in DB
-    upsertRecruiter({
+    upsertRecruiter(userId, {
       name: recruiterName || '',
       profile_url: profileUrl,
       company: company,
     });
-    markRecruiterContacted(profileUrl, message);
+    markRecruiterContacted(userId, profileUrl, message);
 
     const remaining = DAILY_LIMIT - todayCount - 1;
     log.info(`LinkedIn: ✅ message sent to ${recruiterName || profileUrl}. ${remaining} messages remaining today.`);
@@ -295,7 +296,8 @@ export async function linkedinMessage(
 
 export async function linkedinBulkMessage(
   profiles: { profileUrl: string; name?: string; company?: string }[],
-  messageTemplate: string
+  messageTemplate: string,
+  userId: string = '__legacy__'
 ): Promise<string> {
   const results: string[] = [];
   let sent = 0;
@@ -303,12 +305,12 @@ export async function linkedinBulkMessage(
   let failed = 0;
 
   for (const profile of profiles) {
-    if (getContactedToday() >= DAILY_LIMIT) {
+    if (getContactedToday(userId) >= DAILY_LIMIT) {
       results.push(`⚠️ Daily limit reached. Stopped after ${sent} messages.`);
       break;
     }
 
-    if (isRecruiterContacted(profile.profileUrl)) {
+    if (isRecruiterContacted(userId, profile.profileUrl)) {
       skipped++;
       continue;
     }
@@ -324,6 +326,7 @@ export async function linkedinBulkMessage(
     const result = await linkedinMessage(
       profile.profileUrl,
       message,
+      userId,
       profile.name,
       profile.company
     );

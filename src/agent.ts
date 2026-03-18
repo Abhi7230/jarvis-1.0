@@ -1,11 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
 import Groq from 'groq-sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { toolDefinitions, executeTool } from './tools/index';
+import { toolDefinitions, getToolsForPlan, executeTool } from './tools/index';
 import { saveMessage, getHistory } from './db/schema';
 import { log } from './logger';
+import { UserContext } from './context';
 
-const MAX_ROUNDS = 5;
 const MAX_TOOL_OUTPUT = 2000;
 
 const SYSTEM_PROMPT = `You are Jarvis — a persistent, autonomous job-search agent running 24/7.
@@ -19,7 +19,7 @@ Your mission: help the user land a job by:
 - Providing daily summaries and stats
 
 Rules:
-- Be concise and action-oriented. Use *bold* for names and important info (WhatsApp markdown).
+- Be concise and action-oriented. Use *bold* for names and important info.
 - For greetings like "hi", "hey", "hello": just respond with a short friendly greeting and ask how you can help. Do NOT call any tools for greetings.
 - Only call tools when the user explicitly asks you to do something (search, message, check stats, etc.).
 - NEVER invent or guess credentials, URLs, emails, or profile links. Only use what the user provides or what tools return.
@@ -51,8 +51,9 @@ function getCostSuffix(): string {
 
 // ── Convert tool definitions to Anthropic format ──
 
-function getAnthropicTools() {
-  return toolDefinitions.map((t) => ({
+function getAnthropicTools(ctx: UserContext) {
+  const tools = getToolsForPlan(ctx);
+  return tools.map((t) => ({
     name: t.function.name,
     description: t.function.description,
     input_schema: t.function.parameters as any,
@@ -63,7 +64,8 @@ function getAnthropicTools() {
 
 async function callClaude(
   messages: any[],
-  systemPrompt: string
+  systemPrompt: string,
+  ctx: UserContext
 ): Promise<{ content: string | null; toolCalls: any[] | null }> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -102,7 +104,7 @@ async function callClaude(
     max_tokens: 4096,
     system: systemPrompt,
     messages: anthropicMessages,
-    tools: getAnthropicTools(),
+    tools: getAnthropicTools(ctx),
   });
 
   const usage = response.usage;
@@ -136,14 +138,16 @@ async function callClaude(
 
 async function callGroq(
   messages: any[],
-  model: string
+  model: string,
+  ctx: UserContext
 ): Promise<{ content: string | null; toolCalls: any[] | null }> {
   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+  const planTools = getToolsForPlan(ctx);
   const response = await groq.chat.completions.create({
     model,
     messages,
-    tools: toolDefinitions,
+    tools: planTools,
     tool_choice: 'auto',
     max_tokens: 4096,
   });
@@ -185,14 +189,15 @@ async function callGemini(messages: any[]): Promise<string> {
 
 async function callLLM(
   messages: any[],
-  needsTools: boolean
+  needsTools: boolean,
+  ctx: UserContext
 ): Promise<{ content: string | null; toolCalls: any[] | null }> {
   // Chain: Groq 70B (free+tools) → Claude (paid+tools) → Groq 8B (free, text only) → Gemini (free, text only)
 
   // 1. Try Groq 70B (free, good at tools)
   try {
     log.info('Calling Groq 70B...');
-    const result = await callGroq(messages, 'llama-3.3-70b-versatile');
+    const result = await callGroq(messages, 'llama-3.3-70b-versatile', ctx);
     log.info('Groq 70B responded', result.toolCalls ? `with ${result.toolCalls.length} tool call(s)` : '(text only)');
     return result;
   } catch (e: any) {
@@ -203,7 +208,7 @@ async function callLLM(
   if (needsTools) {
     try {
       log.info('Calling Claude (paid, tool-capable fallback)...');
-      const result = await callClaude(messages, SYSTEM_PROMPT);
+      const result = await callClaude(messages, SYSTEM_PROMPT, ctx);
       log.info('Claude responded', result.toolCalls ? `with ${result.toolCalls.length} tool call(s)` : '(text only)');
       return result;
     } catch (e: any) {
@@ -214,7 +219,7 @@ async function callLLM(
   // 3. Try Groq 8B (free, OK for text, weak at tools)
   try {
     log.info('Calling Groq 8B...');
-    const result = await callGroq(messages, 'llama-3.1-8b-instant');
+    const result = await callGroq(messages, 'llama-3.1-8b-instant', ctx);
     log.info('Groq 8B responded', result.toolCalls ? `with ${result.toolCalls.length} tool call(s)` : '(text only)');
     return result;
   } catch (e: any) {
@@ -235,7 +240,7 @@ async function callLLM(
   if (!needsTools) {
     try {
       log.info('Calling Claude (last resort)...');
-      const result = await callClaude(messages, SYSTEM_PROMPT);
+      const result = await callClaude(messages, SYSTEM_PROMPT, ctx);
       return result;
     } catch (e: any) {
       log.warn('Claude failed:', e.message?.slice(0, 150));
@@ -247,11 +252,12 @@ async function callLLM(
 
 // ── Main agent loop ──
 
-export async function runAgent(userMessage: string, sessionId: string): Promise<string> {
-  saveMessage(sessionId, 'user', userMessage);
+export async function runAgent(userMessage: string, ctx: UserContext): Promise<string> {
+  const sessionId = ctx.userId;
+  saveMessage(ctx.userId, sessionId, 'user', userMessage);
   resetTokenTracking();
 
-  const history = getHistory(sessionId, 10);
+  const history = getHistory(ctx.userId, sessionId, 10);
   const messages: any[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     ...history.map((h: any) => ({ role: h.role, content: h.content })),
@@ -263,19 +269,18 @@ export async function runAgent(userMessage: string, sessionId: string): Promise<
   }
 
   let finalResponse = '';
+  const maxRounds = ctx.limits.agentRounds;
 
-  for (let round = 0; round < MAX_ROUNDS; round++) {
-    log.info(`Agent round ${round + 1}/${MAX_ROUNDS}`);
+  for (let round = 0; round < maxRounds; round++) {
+    log.info(`Agent round ${round + 1}/${maxRounds}`);
 
     let content: string | null = null;
     let toolCalls: any[] | null = null;
 
-    // First round: we don't know if tools are needed yet, so allow tools
-    // Subsequent rounds (after tool results): definitely need tools
     const needsTools = round > 0;
 
     try {
-      const result = await callLLM(messages, needsTools || round === 0);
+      const result = await callLLM(messages, needsTools || round === 0, ctx);
       content = result.content;
       toolCalls = result.toolCalls;
     } catch (e: any) {
@@ -310,7 +315,7 @@ export async function runAgent(userMessage: string, sessionId: string): Promise<
       }
 
       log.info(`Executing tool: ${fnName}`, JSON.stringify(fnArgs).slice(0, 200));
-      const result = await executeTool(fnName, fnArgs);
+      const result = await executeTool(fnName, fnArgs, ctx);
       const truncatedResult = truncate(result);
       log.info(`Tool ${fnName} result:`, truncatedResult.slice(0, 300));
 
@@ -334,7 +339,7 @@ export async function runAgent(userMessage: string, sessionId: string): Promise<
 
     if (finalResponse) break;
 
-    if (round === MAX_ROUNDS - 1) {
+    if (round === maxRounds - 1) {
       finalResponse = content || 'Completed tool operations.';
     }
   }
@@ -343,7 +348,7 @@ export async function runAgent(userMessage: string, sessionId: string): Promise<
   finalResponse += getCostSuffix();
 
   if (finalResponse) {
-    saveMessage(sessionId, 'assistant', finalResponse);
+    saveMessage(ctx.userId, sessionId, 'assistant', finalResponse);
   }
 
   return finalResponse;

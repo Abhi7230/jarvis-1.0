@@ -1,4 +1,4 @@
-import { getPage } from '../controller';
+import { getPageForUser } from '../browser-pool';
 import { upsertRecruiter } from '../db/schema';
 import { log } from '../logger';
 
@@ -12,12 +12,13 @@ interface SearchResult {
 
 export async function linkedinSearch(
   query: string,
-  maxResults: number = 10
+  maxResults: number = 10,
+  userId: string = '__legacy__'
 ): Promise<SearchResult[]> {
   const encodedQuery = encodeURIComponent(query);
   const searchUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodedQuery}&origin=GLOBAL_SEARCH_HEADER`;
 
-  const page = await getPage(searchUrl);
+  const page = await getPageForUser(userId, searchUrl);
   await page.waitForTimeout(3000);
 
   // Check if we're on login page
@@ -49,7 +50,7 @@ export async function linkedinSearch(
 
   // Save all results to DB
   for (const r of results) {
-    upsertRecruiter({
+    upsertRecruiter(userId, {
       name: r.name,
       profile_url: r.profileUrl,
       headline: r.headline,
@@ -258,14 +259,14 @@ async function strategyC(page: any, maxResults: number): Promise<SearchResult[]>
   }
 }
 
-export async function linkedinGetProfile(profileUrl: string): Promise<string> {
+export async function linkedinGetProfile(profileUrl: string, userId: string = '__legacy__'): Promise<string> {
   try {
     // Normalize URL
     if (!profileUrl.startsWith('http')) {
       profileUrl = `https://www.linkedin.com${profileUrl.startsWith('/') ? '' : '/'}${profileUrl}`;
     }
 
-    const page = await getPage(profileUrl);
+    const page = await getPageForUser(userId, profileUrl);
     await page.waitForTimeout(4000);
 
     if (page.url().includes('/login') || page.url().includes('/authwall')) {
@@ -328,7 +329,7 @@ export async function linkedinGetProfile(profileUrl: string): Promise<string> {
       return { name, headline, location, about: about.slice(0, 500), experiences, connectionInfo };
     });
 
-    upsertRecruiter({
+    upsertRecruiter(userId, {
       name: profile.name,
       profile_url: profileUrl,
       headline: profile.headline,

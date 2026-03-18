@@ -12,6 +12,6 @@ jarvis.db-wal
 jarvis.db-shm
 jarvis.log
 jarvis_stdout.log
-resume.pdf
-whatsapp_qr.png
+*.png
 .debug_*.png
+.git/

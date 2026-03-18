@@ -11,6 +11,8 @@ import {
   clearChatHistory,
 } from '../db/schema';
 import { log } from '../logger';
+import { UserContext } from '../context';
+import { isToolAllowed } from '../plans';
 
 // ── Tool definitions for the LLM (OpenAI-compatible format) ──
 
@@ -19,7 +21,7 @@ export const toolDefinitions = [
     type: 'function' as const,
     function: {
       name: 'linkedin_login',
-      description: 'Log in to LinkedIn using stored credentials. No parameters needed — credentials come from environment variables.',
+      description: 'Log in to LinkedIn using stored credentials. No parameters needed — credentials come from your account settings.',
       parameters: {
         type: 'object',
         properties: {},
@@ -83,7 +85,7 @@ export const toolDefinitions = [
     function: {
       name: 'linkedin_message',
       description:
-        'Send a personalized message to a LinkedIn connection. Checks daily limit (15/day) and dedup automatically.',
+        'Send a personalized message to a LinkedIn connection. Checks daily limit and dedup automatically.',
       parameters: {
         type: 'object',
         properties: {
@@ -285,40 +287,48 @@ export const toolDefinitions = [
     type: 'function' as const,
     function: {
       name: 'clear_history',
-      description: 'Clear the chat history for a session.',
+      description: 'Clear the chat history for the current session.',
       parameters: {
         type: 'object',
-        properties: {
-          session_id: { type: 'string', description: 'Session ID (WhatsApp JID) to clear' },
-        },
-        required: ['session_id'],
+        properties: {},
       },
     },
   },
 ];
 
+// Filter tool definitions by user plan
+export function getToolsForPlan(ctx: UserContext) {
+  return toolDefinitions.filter((t) => isToolAllowed(ctx.plan, t.function.name));
+}
+
 // ── Tool executor ──
 
 export async function executeTool(
   name: string,
-  args: Record<string, any>
+  args: Record<string, any>,
+  ctx: UserContext
 ): Promise<string> {
+  // Plan gating
+  if (!isToolAllowed(ctx.plan, name)) {
+    return `🔒 *${name}* requires a Pro or Premium plan. Use /upgrade to unlock this feature.`;
+  }
+
   try {
     switch (name) {
-      case 'linkedin_login':
-        return await linkedinLogin(
-          process.env.LINKEDIN_EMAIL || '',
-          process.env.LINKEDIN_PASSWORD || ''
-        );
+      case 'linkedin_login': {
+        const creds = ctx.linkedinCredentials;
+        if (!creds) return '❌ LinkedIn credentials not configured. Use /login_linkedin to set them up.';
+        return await linkedinLogin(creds.email, creds.password, ctx.userId);
+      }
 
       case 'linkedin_verify':
-        return await linkedinVerify(args.code);
+        return await linkedinVerify(args.code, ctx.userId);
 
       case 'linkedin_status':
-        return await linkedinStatus();
+        return await linkedinStatus(ctx.userId);
 
-      case 'linkedin_search':
-        const searchResults = await linkedinSearch(args.query, args.max_results || 10);
+      case 'linkedin_search': {
+        const searchResults = await linkedinSearch(args.query, args.max_results || 10, ctx.userId);
         if (searchResults.length === 0) return 'No results found.';
         return searchResults
           .map(
@@ -326,33 +336,35 @@ export async function executeTool(
               `${i + 1}. *${r.name}*${r.headline ? `\n   ${r.headline}` : ''}${r.location ? `\n   📍 ${r.location}` : ''}\n   🔗 ${r.profileUrl}`
           )
           .join('\n\n');
+      }
 
       case 'linkedin_get_profile':
-        return await linkedinGetProfile(args.profile_url);
+        return await linkedinGetProfile(args.profile_url, ctx.userId);
 
       case 'linkedin_message':
         return await linkedinMessage(
           args.profile_url,
           args.message,
+          ctx.userId,
           args.recruiter_name,
           args.company
         );
 
       case 'linkedin_bulk_message':
-        return await linkedinBulkMessage(args.profiles, args.message_template);
+        return await linkedinBulkMessage(args.profiles, args.message_template, ctx.userId);
 
       case 'overleaf_read':
-        return await overleafRead(args.project_url || process.env.OVERLEAF_PROJECT_URL || '');
+        return await overleafRead(args.project_url || ctx.overleafUrl || '');
 
       case 'overleaf_replace':
         return await overleafReplace(
-          args.project_url || process.env.OVERLEAF_PROJECT_URL || '',
+          args.project_url || ctx.overleafUrl || '',
           args.search_text,
           args.replace_text
         );
 
       case 'overleaf_compile':
-        return await overleafCompile(args.project_url || process.env.OVERLEAF_PROJECT_URL || '');
+        return await overleafCompile(args.project_url || ctx.overleafUrl || '');
 
       case 'gmail_send':
         return await gmailSend(args.to, args.subject, args.body);
@@ -367,7 +379,7 @@ export async function executeTool(
         return await gmailLabel(args.message_id, args.label);
 
       case 'get_followups': {
-        const followups = getPendingFollowups(args.days_since || 3);
+        const followups = getPendingFollowups(ctx.userId, args.days_since || 3);
         if (followups.length === 0) return 'No pending follow-ups.';
         return followups
           .map(
@@ -378,19 +390,19 @@ export async function executeTool(
       }
 
       case 'get_stats': {
-        const stats = getStats();
+        const stats = getStats(ctx.userId);
         return [
           `📊 *Job Search Stats*`,
           `Total recruiters found: *${stats.total_recruiters}*`,
           `Contacted: *${stats.contacted}*`,
           `Replied: *${stats.replied}*`,
-          `Contacted today: *${stats.contacted_today}*/15`,
+          `Contacted today: *${stats.contacted_today}*/${ctx.limits.linkedinMessagesPerDay}`,
           `Jobs tracked: *${stats.total_jobs}*`,
         ].join('\n');
       }
 
       case 'save_job': {
-        saveJob({
+        saveJob(ctx.userId, {
           title: args.title,
           company: args.company,
           url: args.url,
@@ -400,7 +412,7 @@ export async function executeTool(
       }
 
       case 'get_jobs': {
-        const jobs = getJobs(args.status);
+        const jobs = getJobs(ctx.userId, args.status);
         if (jobs.length === 0) return 'No jobs found.';
         return jobs
           .map(
@@ -411,7 +423,7 @@ export async function executeTool(
       }
 
       case 'clear_history':
-        clearChatHistory(args.session_id);
+        clearChatHistory(ctx.userId, ctx.userId);
         return '✅ Chat history cleared.';
 
       default:

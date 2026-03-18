@@ -1,0 +1,11 @@
+services:
+  jarvis:
+    build: .
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./.env.production:/app/.env
+    environment:
+      - NODE_ENV=production
