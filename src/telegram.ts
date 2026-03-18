@@ -43,13 +43,35 @@ export function startTelegramBot() {
 
   bot = new Bot(token);
 
-  // /start — register user
+  // /start — register user (also handles deep links like /start premium)
   bot.command('start', async (ctx) => {
     const user = getOrCreateUser(
       String(ctx.from?.id),
       ctx.from?.username,
       ctx.from?.first_name
     );
+
+    // Check for deep link payload (e.g. t.me/bot?start=premium)
+    const payload = ctx.match;
+    if (payload === 'premium') {
+      await ctx.reply(
+        `Hey ${user.name || 'there'}! You want *Premium*? Great choice!\n\n` +
+        `*Premium Plan — ₹499/month*\n` +
+        `• 50 LinkedIn searches/day\n` +
+        `• 50 LinkedIn messages/day\n` +
+        `• Auto follow-up reminders\n` +
+        `• Gmail integration\n` +
+        `• Resume editing\n\n` +
+        `To activate Premium:\n` +
+        `1. Pay ₹499 via UPI: *abhir0609@oksbi*\n` +
+        `2. Send the payment screenshot here\n` +
+        `3. I'll activate Premium within minutes!\n\n` +
+        `Or type /start to explore the free plan first.`,
+        { parse_mode: 'Markdown' }
+      );
+      return;
+    }
+
     await ctx.reply(
       `Hey ${user.name || 'there'}! I'm *Jarvis* — your AI job search assistant.\n\n` +
       `I can help you:\n` +

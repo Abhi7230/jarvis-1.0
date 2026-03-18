@@ -1,12 +1,18 @@
 import express from 'express';
 import helmet from 'helmet';
 import { handleWebhook } from './stripe';
+import { getLandingHTML } from './landing';
 import { log } from './logger';
 
 export function startHttpServer(port: number = 3000) {
   const app = express();
 
-  app.use(helmet());
+  app.use(helmet({ contentSecurityPolicy: false }));
+
+  // Landing page
+  app.get('/', (_req, res) => {
+    res.type('html').send(getLandingHTML());
+  });
 
   // Stripe webhook needs raw body
   app.post(
