@@ -63,7 +63,7 @@ export function startTelegramBot() {
         `• Gmail integration\n` +
         `• Resume editing\n\n` +
         `To activate Premium:\n` +
-        `1. Pay ₹499 via UPI: *abhir0609@oksbi*\n` +
+        `1. Pay ₹499 via UPI: *abhir0609-3@oksbi*\n` +
         `2. Send the payment screenshot here\n` +
         `3. I'll activate Premium within minutes!\n\n` +
         `Or type /start to explore the free plan first.`,
