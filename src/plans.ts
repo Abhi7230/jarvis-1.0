@@ -15,8 +15,10 @@ export const PLANS: Record<PlanType, PlanLimits> = {
   free: {
     linkedinSearchesPerDay: 5,
     linkedinMessagesPerDay: 0,
-    agentRounds: 3,
+    agentRounds: 5,
     allowedTools: [
+      'linkedin_login',
+      'linkedin_verify',
       'linkedin_search',
       'linkedin_status',
       'linkedin_get_profile',

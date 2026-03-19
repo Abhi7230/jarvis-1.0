@@ -273,61 +273,28 @@ export async function linkedinGetProfile(profileUrl: string, userId: string = '_
       return 'Not logged in to LinkedIn.';
     }
 
-    const profile = await page.evaluate(() => {
-      const getText = (selectors: string[]): string => {
-        for (const sel of selectors) {
-          const el = document.querySelector(sel);
-          if (el?.textContent?.trim()) return el.textContent.trim();
+    // Use string-based evaluate to avoid esbuild __name injection
+    const profile = await page.evaluate(`(() => {
+      function getText(sels) {
+        for (var i = 0; i < sels.length; i++) {
+          var el = document.querySelector(sels[i]);
+          if (el && el.textContent && el.textContent.trim()) return el.textContent.trim();
         }
         return '';
-      };
-
-      const name = getText([
-        'h1.text-heading-xlarge',
-        'h1[class*="heading"]',
-        '.top-card-layout__title',
-        'h1',
-      ]) || 'Unknown';
-
-      const headline = getText([
-        '.text-body-medium.break-words',
-        'div[class*="text-body-medium"]',
-        '.top-card-layout__headline',
-      ]);
-
-      const location = getText([
-        '.text-body-small.inline.t-black--light.break-words',
-        'span.text-body-small[class*="t-black--light"]',
-        '.top-card-layout__first-subline',
-      ]);
-
-      const about = getText([
-        '.pv-about__summary-text span[aria-hidden="true"]',
-        'section.summary .core-section-container__content',
-        '#about ~ div span[aria-hidden="true"]',
-      ]);
-
-      const experiences: string[] = [];
-      document
-        .querySelectorAll(
-          '#experience ~ .pvs-list__outer-container li.artdeco-list__item, .experience-section li, [id*="experience"] li'
-        )
-        .forEach((el, i) => {
-          if (i < 3) {
-            const text = el.textContent?.replace(/\s+/g, ' ').trim() || '';
-            if (text) experiences.push(text.slice(0, 200));
-          }
-        });
-
-      // Get connection degree
-      const connectionInfo = getText([
-        '.dist-value',
-        'span[class*="distance-badge"]',
-        '.pv-top-card--list span.text-body-small',
-      ]);
-
-      return { name, headline, location, about: about.slice(0, 500), experiences, connectionInfo };
-    });
+      }
+      var name = getText(['h1.text-heading-xlarge','h1[class*="heading"]','.top-card-layout__title','h1']) || 'Unknown';
+      var headline = getText(['.text-body-medium.break-words','div[class*="text-body-medium"]','.top-card-layout__headline']);
+      var loc = getText(['.text-body-small.inline.t-black--light.break-words','span.text-body-small[class*="t-black--light"]','.top-card-layout__first-subline']);
+      var about = getText(['.pv-about__summary-text span[aria-hidden="true"]','section.summary .core-section-container__content','#about ~ div span[aria-hidden="true"]']);
+      var exps = [];
+      var items = document.querySelectorAll('#experience ~ .pvs-list__outer-container li.artdeco-list__item, .experience-section li, [id*="experience"] li');
+      for (var j = 0; j < Math.min(items.length, 3); j++) {
+        var t = (items[j].textContent || '').replace(/\\s+/g, ' ').trim();
+        if (t) exps.push(t.slice(0, 200));
+      }
+      var connectionInfo = getText(['.dist-value','span[class*="distance-badge"]','.pv-top-card--list span.text-body-small']);
+      return { name: name, headline: headline, location: loc, about: about.slice(0, 500), experiences: exps, connectionInfo: connectionInfo };
+    })()`) as any;
 
     upsertRecruiter(userId, {
       name: profile.name,
