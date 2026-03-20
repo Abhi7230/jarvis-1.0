@@ -1,6 +1,10 @@
 import { linkedinLogin, linkedinVerify, linkedinStatus } from '../linkedin/auth';
 import { linkedinSearch, linkedinGetProfile } from '../linkedin/search';
 import { linkedinMessage, linkedinBulkMessage } from '../linkedin/messaging';
+import { linkedinBrowse } from '../linkedin/browse';
+import { webBrowse } from '../web/browse';
+import { webSearch } from '../web/search';
+import { webClick, webType, setLastBrowseContext } from '../web/interact';
 import { overleafRead, overleafReplace, overleafCompile } from '../overleaf/editor';
 import { gmailSend, gmailRead, gmailBody, gmailLabel } from '../gmail/index';
 import {
@@ -294,6 +298,107 @@ export const toolDefinitions = [
       },
     },
   },
+  // ── General-purpose browser agent tools ──
+  {
+    type: 'function' as const,
+    function: {
+      name: 'linkedin_browse',
+      description:
+        'Browse any LinkedIn page and return its visible text content. Use for any LinkedIn question not covered by specific tools. ' +
+        'Pass a full LinkedIn URL or a shortcut: "my profile", "my connections", "my network", "notifications", "messaging", "jobs", "feed", "who viewed me", "invitations", "my posts", "saved posts", "settings". ' +
+        'Read-only — cannot click, post, or interact.',
+      parameters: {
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            description: 'A LinkedIn URL or shortcut keyword (e.g. "my connections", "notifications")',
+          },
+        },
+        required: ['url'],
+      },
+    },
+  },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'web_browse',
+      description:
+        'Navigate to any URL and return visible text content. Works on job boards, company pages, articles, etc. Read-only.',
+      parameters: {
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            description: 'Full URL to browse (e.g. "https://example.com/jobs")',
+          },
+        },
+        required: ['url'],
+      },
+    },
+  },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'web_search',
+      description:
+        'Search Google and return results with titles, URLs, and snippets. Use to find job postings, company info, people, emails, etc.',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: 'Google search query (e.g. "ML engineer jobs San Francisco")',
+          },
+          max_results: {
+            type: 'number',
+            description: 'Maximum results to return (default 8)',
+          },
+        },
+        required: ['query'],
+      },
+    },
+  },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'web_click',
+      description:
+        'Click a button or link on the current page by its visible text. Must call web_browse or linkedin_browse first to navigate to a page. Requires Pro/Premium plan.',
+      parameters: {
+        type: 'object',
+        properties: {
+          text: {
+            type: 'string',
+            description: 'Visible text of the button/link to click (e.g. "Apply Now", "Accept", "Next")',
+          },
+        },
+        required: ['text'],
+      },
+    },
+  },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'web_type',
+      description:
+        'Type text into an input field on the current page by its label or placeholder. Must call web_browse first. Requires Pro/Premium plan.',
+      parameters: {
+        type: 'object',
+        properties: {
+          field: {
+            type: 'string',
+            description: 'Label or placeholder text of the input field (e.g. "Email", "Search", "Name")',
+          },
+          value: {
+            type: 'string',
+            description: 'Text to type into the field',
+          },
+        },
+        required: ['field', 'value'],
+      },
+    },
+  },
 ];
 
 // Filter tool definitions by user plan
@@ -425,6 +530,37 @@ export async function executeTool(
       case 'clear_history':
         clearChatHistory(ctx.userId, ctx.userId);
         return '✅ Chat history cleared.';
+
+      // ── General-purpose browser agent tools ──
+
+      case 'linkedin_browse': {
+        if (!args.url) return 'Please provide a LinkedIn URL or shortcut keyword (e.g. "my connections", "notifications").';
+        setLastBrowseContext(ctx.userId, true);
+        return await linkedinBrowse(args.url, ctx.userId);
+      }
+
+      case 'web_browse': {
+        if (!args.url) return 'Please provide a URL to browse.';
+        // If it's a LinkedIn URL, redirect to linkedin_browse (uses auth)
+        if (args.url.includes('linkedin.com')) {
+          setLastBrowseContext(ctx.userId, true);
+          return await linkedinBrowse(args.url, ctx.userId);
+        }
+        setLastBrowseContext(ctx.userId, false);
+        return await webBrowse(args.url);
+      }
+
+      case 'web_search': {
+        if (!args.query) return 'Please provide a search query.';
+        setLastBrowseContext(ctx.userId, false);
+        return await webSearch(args.query, args.max_results || 8);
+      }
+
+      case 'web_click':
+        return await webClick(args.text, ctx.userId);
+
+      case 'web_type':
+        return await webType(args.field, args.value, ctx.userId);
 
       default:
         return `Unknown tool: ${name}`;

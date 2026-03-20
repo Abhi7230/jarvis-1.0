@@ -26,7 +26,12 @@ Rules:
 - CRITICAL: If linkedin_login returns a verification/2FA challenge, STOP immediately. Tell the user to check their email/phone and send you the code. Do NOT call linkedin_verify yourself — WAIT for the user to send the code in their next message. NEVER use a dummy code like "123456".
 - When asked to message someone on LinkedIn: ALWAYS search first to get their exact profile URL, then use that URL to message them. Never guess profile URLs.
 - linkedin_login uses stored credentials — never pass email or password yourself.
-- Always complete tasks fully in one response. Never say you will do something later.`;
+- Always complete tasks fully in one response. Never say you will do something later.
+- For LinkedIn questions not covered by specific tools (connections count, notifications, trending posts, who viewed me, etc.), use linkedin_browse with a URL or shortcut keyword.
+- To research anything on the web (job postings, company info, recruiter emails), use web_search then web_browse on the results.
+- To interact with web pages (apply to jobs, fill forms, click buttons), use web_click and web_type after browsing to the page. These require a paid plan.
+- Prefer specific tools (linkedin_search, linkedin_message, gmail_send) when they directly apply — they are more reliable. Use general browse tools for everything else.
+- web_click and web_type operate on the last browsed page. Always browse first, then interact.`;
 
 function truncate(text: string, max: number = MAX_TOOL_OUTPUT): string {
   if (text.length <= max) return text;
@@ -194,7 +199,9 @@ async function callLLM(
   needsTools: boolean,
   ctx: UserContext
 ): Promise<{ content: string | null; toolCalls: any[] | null }> {
-  // Chain: Groq 70B (free+tools) → Claude (paid+tools) → Groq 8B (free, text only) → Gemini (free, text only)
+  // Free plan: Groq + Gemini only (no Claude — saves cost)
+  // Paid plans: Groq → Claude → Gemini (full fallback chain)
+  const canUseClaude = ctx.plan !== 'free' && !!process.env.ANTHROPIC_API_KEY;
 
   // 1. Try Groq 70B (free, good at tools)
   try {
@@ -206,8 +213,8 @@ async function callLLM(
     log.warn('Groq 70B failed:', e.message?.slice(0, 150));
   }
 
-  // 2. If we need tool calls, use Claude (reliable). Otherwise try cheaper options first.
-  if (needsTools) {
+  // 2. If we need tool calls and user is on a paid plan, use Claude (reliable)
+  if (needsTools && canUseClaude) {
     try {
       log.info('Calling Claude (paid, tool-capable fallback)...');
       const result = await callClaude(messages, SYSTEM_PROMPT, ctx);
@@ -238,8 +245,8 @@ async function callLLM(
     log.warn('Gemini failed:', e.message?.slice(0, 150));
   }
 
-  // 5. Last resort: Claude for text if we haven't tried it yet
-  if (!needsTools) {
+  // 5. Last resort: Claude for text if paid and we haven't tried it yet
+  if (!needsTools && canUseClaude) {
     try {
       log.info('Calling Claude (last resort)...');
       const result = await callClaude(messages, SYSTEM_PROMPT, ctx);

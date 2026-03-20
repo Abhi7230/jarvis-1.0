@@ -16,67 +16,82 @@ let schedulerStarted = false;
 async function main() {
   log.info('Jarvis starting up...');
 
-  // 1. Initialize database
-  initDb();
-
-  // 2. Start Telegram bot (primary multi-user interface)
-  if (process.env.TELEGRAM_BOT_TOKEN) {
-    startTelegramBot();
-    startMultiUserScheduler();
-    log.info('Telegram bot + multi-user scheduler started');
-  }
-
-  // 3. Start HTTP server (health check + Stripe webhooks)
+  // 1. Start HTTP server FIRST — HuggingFace needs this to detect the container is alive
   const port = Number(process.env.PORT) || 3000;
   startHttpServer(port);
 
+  // 2. Initialize database
+  try {
+    initDb();
+  } catch (err: any) {
+    log.error('Database init failed:', err.message);
+  }
+
+  // 3. Start Telegram bot (primary multi-user interface)
+  if (process.env.TELEGRAM_BOT_TOKEN) {
+    try {
+      startTelegramBot();
+      startMultiUserScheduler();
+      log.info('Telegram bot + multi-user scheduler started');
+    } catch (err: any) {
+      log.error('Telegram bot failed to start:', err.message);
+    }
+  } else {
+    log.warn('TELEGRAM_BOT_TOKEN not set — bot will not start');
+  }
+
   // 4. Optional: WhatsApp for personal/self-hosted use
   if (process.env.WHATSAPP_ENABLED !== 'false') {
-    const wa = await startWhatsApp(async (jid: string, text: string) => {
-      if (!ownerJid) {
-        ownerJid = jid;
-        log.info(`Owner JID set to: ${jid}`);
-      }
+    try {
+      const wa = await startWhatsApp(async (jid: string, text: string) => {
+        if (!ownerJid) {
+          ownerJid = jid;
+          log.info(`Owner JID set to: ${jid}`);
+        }
 
-      if (!schedulerStarted && ownerJid) {
-        startScheduler(wa.sendMessage, ownerJid);
-        schedulerStarted = true;
-      }
+        if (!schedulerStarted && ownerJid) {
+          startScheduler(wa.sendMessage, ownerJid);
+          schedulerStarted = true;
+        }
 
-      // Build a legacy user context for WhatsApp self-hosted mode
-      const ctx = buildUserContext({
-        id: '__legacy__',
-        telegram_id: null,
-        telegram_username: null,
-        email: null,
-        name: 'Owner',
-        plan: 'premium' as any, // Self-hosted gets all features
-        stripe_customer_id: null,
-        stripe_subscription_id: null,
-        subscription_status: 'active',
-        linkedin_credentials: null,
-        gmail_token: null,
-        overleaf_url: process.env.OVERLEAF_PROJECT_URL || null,
-        daily_searches_used: 0,
-        daily_messages_used: 0,
-        daily_reset_at: null,
-        created_at: '',
-        updated_at: '',
+        // Build a legacy user context for WhatsApp self-hosted mode
+        const ctx = buildUserContext({
+          id: '__legacy__',
+          telegram_id: null,
+          telegram_username: null,
+          email: null,
+          name: 'Owner',
+          plan: 'premium' as any, // Self-hosted gets all features
+          stripe_customer_id: null,
+          stripe_subscription_id: null,
+          subscription_status: 'active',
+          linkedin_credentials: null,
+          gmail_token: null,
+          overleaf_url: process.env.OVERLEAF_PROJECT_URL || null,
+          daily_searches_used: 0,
+          daily_messages_used: 0,
+          daily_reset_at: null,
+          created_at: '',
+          updated_at: '',
+        });
+
+        // For legacy mode, inject env credentials
+        if (process.env.LINKEDIN_EMAIL && process.env.LINKEDIN_PASSWORD) {
+          ctx.linkedinCredentials = {
+            email: process.env.LINKEDIN_EMAIL,
+            password: process.env.LINKEDIN_PASSWORD,
+          };
+        }
+
+        const response = await runAgent(text, ctx);
+        return response;
       });
 
-      // For legacy mode, inject env credentials
-      if (process.env.LINKEDIN_EMAIL && process.env.LINKEDIN_PASSWORD) {
-        ctx.linkedinCredentials = {
-          email: process.env.LINKEDIN_EMAIL,
-          password: process.env.LINKEDIN_PASSWORD,
-        };
-      }
-
-      const response = await runAgent(text, ctx);
-      return response;
-    });
-
-    log.info('Jarvis is running. Scan the QR code with WhatsApp to connect.');
+      log.info('Jarvis is running. Scan the QR code with WhatsApp to connect.');
+    } catch (err: any) {
+      log.error('WhatsApp failed to start:', err.message);
+      log.info('Continuing without WhatsApp support');
+    }
   } else {
     log.info('Jarvis is running in Telegram-only mode.');
   }
@@ -106,5 +121,5 @@ process.on('unhandledRejection', (reason: any) => {
 
 main().catch((err) => {
   log.error('Fatal startup error:', err.message);
-  process.exit(1);
+  // Don't exit — keep HTTP server alive so HF doesn't restart endlessly
 });
