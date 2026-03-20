@@ -194,7 +194,9 @@ async function callLLM(
   needsTools: boolean,
   ctx: UserContext
 ): Promise<{ content: string | null; toolCalls: any[] | null }> {
-  // Chain: Groq 70B (free+tools) → Claude (paid+tools) → Groq 8B (free, text only) → Gemini (free, text only)
+  // Free plan: Groq + Gemini only (no Claude — saves cost)
+  // Paid plans: Groq → Claude → Gemini (full fallback chain)
+  const canUseClaude = ctx.plan !== 'free' && !!process.env.ANTHROPIC_API_KEY;
 
   // 1. Try Groq 70B (free, good at tools)
   try {
@@ -206,8 +208,8 @@ async function callLLM(
     log.warn('Groq 70B failed:', e.message?.slice(0, 150));
   }
 
-  // 2. If we need tool calls, use Claude (reliable). Otherwise try cheaper options first.
-  if (needsTools) {
+  // 2. If we need tool calls and user is on a paid plan, use Claude (reliable)
+  if (needsTools && canUseClaude) {
     try {
       log.info('Calling Claude (paid, tool-capable fallback)...');
       const result = await callClaude(messages, SYSTEM_PROMPT, ctx);
@@ -238,8 +240,8 @@ async function callLLM(
     log.warn('Gemini failed:', e.message?.slice(0, 150));
   }
 
-  // 5. Last resort: Claude for text if we haven't tried it yet
-  if (!needsTools) {
+  // 5. Last resort: Claude for text if paid and we haven't tried it yet
+  if (!needsTools && canUseClaude) {
     try {
       log.info('Calling Claude (last resort)...');
       const result = await callClaude(messages, SYSTEM_PROMPT, ctx);
