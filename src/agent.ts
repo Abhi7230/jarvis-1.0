@@ -26,7 +26,12 @@ Rules:
 - CRITICAL: If linkedin_login returns a verification/2FA challenge, STOP immediately. Tell the user to check their email/phone and send you the code. Do NOT call linkedin_verify yourself — WAIT for the user to send the code in their next message. NEVER use a dummy code like "123456".
 - When asked to message someone on LinkedIn: ALWAYS search first to get their exact profile URL, then use that URL to message them. Never guess profile URLs.
 - linkedin_login uses stored credentials — never pass email or password yourself.
-- Always complete tasks fully in one response. Never say you will do something later.`;
+- Always complete tasks fully in one response. Never say you will do something later.
+- For LinkedIn questions not covered by specific tools (connections count, notifications, trending posts, who viewed me, etc.), use linkedin_browse with a URL or shortcut keyword.
+- To research anything on the web (job postings, company info, recruiter emails), use web_search then web_browse on the results.
+- To interact with web pages (apply to jobs, fill forms, click buttons), use web_click and web_type after browsing to the page. These require a paid plan.
+- Prefer specific tools (linkedin_search, linkedin_message, gmail_send) when they directly apply — they are more reliable. Use general browse tools for everything else.
+- web_click and web_type operate on the last browsed page. Always browse first, then interact.`;
 
 function truncate(text: string, max: number = MAX_TOOL_OUTPUT): string {
   if (text.length <= max) return text;

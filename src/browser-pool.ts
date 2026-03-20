@@ -85,7 +85,55 @@ export async function getPageForUser(userId: string, url?: string): Promise<Page
   return page;
 }
 
+// ── Shared browser for public web browsing (no per-user auth needed) ──
+
+let sharedContext: BrowserContext | null = null;
+let sharedPageInstance: Page | null = null;
+
+export async function getSharedPage(url?: string): Promise<Page> {
+  if (!sharedContext) {
+    log.info('BrowserPool: launching shared browser context');
+    const dataDir = path.join(BROWSER_BASE, '__shared__');
+    fs.mkdirSync(dataDir, { recursive: true });
+
+    sharedContext = await chromium.launchPersistentContext(dataDir, {
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-blink-features=AutomationControlled',
+        '--disable-dev-shm-usage',
+      ],
+      viewport: { width: 1280, height: 800 },
+      userAgent:
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+    });
+
+    await sharedContext.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    });
+  }
+
+  if (!sharedPageInstance || sharedPageInstance.isClosed()) {
+    sharedPageInstance = await sharedContext.newPage();
+  }
+
+  if (url) {
+    await sharedPageInstance.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  }
+
+  return sharedPageInstance;
+}
+
 export async function closeAllBrowsers(): Promise<void> {
+  // Close shared context
+  if (sharedContext) {
+    try { await sharedContext.close(); } catch (_) {}
+    sharedContext = null;
+    sharedPageInstance = null;
+  }
+
+  // Close user contexts
   for (const slot of slots) {
     try {
       await slot.context.close();
