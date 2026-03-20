@@ -8,6 +8,9 @@ interface SearchResult {
 }
 
 export async function webSearch(query: string, maxResults: number = 8): Promise<string> {
+  if (!query) return 'Please provide a search query.';
+  maxResults = Math.max(1, Math.min(Number(maxResults) || 8, 20));
+
   try {
     const encoded = encodeURIComponent(query);
     const searchUrl = `https://www.google.com/search?q=${encoded}&hl=en`;

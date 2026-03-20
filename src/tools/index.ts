@@ -534,13 +534,15 @@ export async function executeTool(
       // ── General-purpose browser agent tools ──
 
       case 'linkedin_browse': {
+        if (!args.url) return 'Please provide a LinkedIn URL or shortcut keyword (e.g. "my connections", "notifications").';
         setLastBrowseContext(ctx.userId, true);
         return await linkedinBrowse(args.url, ctx.userId);
       }
 
       case 'web_browse': {
+        if (!args.url) return 'Please provide a URL to browse.';
         // If it's a LinkedIn URL, redirect to linkedin_browse (uses auth)
-        if (args.url && args.url.includes('linkedin.com')) {
+        if (args.url.includes('linkedin.com')) {
           setLastBrowseContext(ctx.userId, true);
           return await linkedinBrowse(args.url, ctx.userId);
         }
@@ -548,9 +550,11 @@ export async function executeTool(
         return await webBrowse(args.url);
       }
 
-      case 'web_search':
+      case 'web_search': {
+        if (!args.query) return 'Please provide a search query.';
         setLastBrowseContext(ctx.userId, false);
         return await webSearch(args.query, args.max_results || 8);
+      }
 
       case 'web_click':
         return await webClick(args.text, ctx.userId);

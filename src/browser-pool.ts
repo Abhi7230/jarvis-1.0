@@ -89,33 +89,49 @@ export async function getPageForUser(userId: string, url?: string): Promise<Page
 
 let sharedContext: BrowserContext | null = null;
 let sharedPageInstance: Page | null = null;
+let sharedContextLaunching: Promise<BrowserContext> | null = null;
 
-export async function getSharedPage(url?: string): Promise<Page> {
-  if (!sharedContext) {
-    log.info('BrowserPool: launching shared browser context');
-    const dataDir = path.join(BROWSER_BASE, '__shared__');
-    fs.mkdirSync(dataDir, { recursive: true });
+async function ensureSharedContext(): Promise<BrowserContext> {
+  if (sharedContext) return sharedContext;
 
-    sharedContext = await chromium.launchPersistentContext(dataDir, {
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-blink-features=AutomationControlled',
-        '--disable-dev-shm-usage',
-      ],
-      viewport: { width: 1280, height: 800 },
-      userAgent:
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-    });
+  // Prevent race condition: reuse the same launch promise
+  if (!sharedContextLaunching) {
+    sharedContextLaunching = (async () => {
+      log.info('BrowserPool: launching shared browser context');
+      const dataDir = path.join(BROWSER_BASE, '__shared__');
+      fs.mkdirSync(dataDir, { recursive: true });
 
-    await sharedContext.addInitScript(() => {
-      Object.defineProperty(navigator, 'webdriver', { get: () => false });
-    });
+      const ctx = await chromium.launchPersistentContext(dataDir, {
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-blink-features=AutomationControlled',
+          '--disable-dev-shm-usage',
+        ],
+        viewport: { width: 1280, height: 800 },
+        userAgent:
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+      });
+
+      await ctx.addInitScript(() => {
+        Object.defineProperty(navigator, 'webdriver', { get: () => false });
+      });
+
+      sharedContext = ctx;
+      sharedContextLaunching = null;
+      return ctx;
+    })();
   }
 
+  return sharedContextLaunching;
+}
+
+export async function getSharedPage(url?: string): Promise<Page> {
+  const ctx = await ensureSharedContext();
+
   if (!sharedPageInstance || sharedPageInstance.isClosed()) {
-    sharedPageInstance = await sharedContext.newPage();
+    sharedPageInstance = await ctx.newPage();
   }
 
   if (url) {
