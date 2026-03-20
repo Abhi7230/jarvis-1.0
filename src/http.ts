@@ -1,6 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import { handleWebhook } from './stripe';
+import { getLandingHTML } from './landing';
 import { log } from './logger';
 
 let keepAliveHandle: ReturnType<typeof setInterval> | null = null;
@@ -8,7 +9,12 @@ let keepAliveHandle: ReturnType<typeof setInterval> | null = null;
 export function startHttpServer(port: number = 3000) {
   const app = express();
 
-  app.use(helmet());
+  app.use(helmet({ contentSecurityPolicy: false }));
+
+  // Landing page
+  app.get('/', (_req, res) => {
+    res.type('html').send(getLandingHTML());
+  });
 
   // Stripe webhook needs raw body
   app.post(
@@ -28,34 +34,6 @@ export function startHttpServer(port: number = 3000) {
 
   // Parse JSON for other routes
   app.use(express.json());
-
-  // Root route — HuggingFace Spaces embeds this in an iframe
-  app.get('/', (_req, res) => {
-    const uptime = process.uptime();
-    const hours = Math.floor(uptime / 3600);
-    const minutes = Math.floor((uptime % 3600) / 60);
-    res.send(`
-      <html>
-      <head><title>Jarvis - AI Job Search Agent</title></head>
-      <body style="font-family:system-ui,sans-serif;text-align:center;padding:60px;background:#0f172a;color:#e2e8f0">
-        <h1 style="font-size:2.5rem">🤖 Jarvis</h1>
-        <p style="font-size:1.2rem;color:#94a3b8">Autonomous AI-Powered Job Search Agent</p>
-        <div style="margin:40px auto;max-width:500px;background:#1e293b;border-radius:12px;padding:30px">
-          <p style="color:#22c55e;font-weight:bold">● Online</p>
-          <p>Uptime: ${hours}h ${minutes}m</p>
-          <hr style="border-color:#334155;margin:20px 0"/>
-          <p style="color:#94a3b8;font-size:0.9rem">
-            Interact with Jarvis via <strong>Telegram</strong>.<br/>
-            Search for <strong>@your_jarvis_bot</strong> on Telegram to get started.
-          </p>
-        </div>
-        <p style="color:#475569;font-size:0.8rem;margin-top:40px">
-          Powered by Claude, Groq &amp; Gemini | Built with Node.js &amp; Playwright
-        </p>
-      </body>
-      </html>
-    `);
-  });
 
   // Payment success/cancel pages
   app.get('/payment/success', (_req, res) => {

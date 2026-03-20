@@ -34,6 +34,19 @@ function getUserContext(user: any): UserContext {
   });
 }
 
+// Safe reply — tries Markdown first, falls back to plain text
+async function safeReply(ctx: Context, text: string, extra?: any) {
+  try {
+    await ctx.reply(text, { parse_mode: 'Markdown', ...extra });
+  } catch {
+    try {
+      await ctx.reply(text, extra);
+    } catch (e: any) {
+      log.error('Telegram: failed to send reply:', e.message);
+    }
+  }
+}
+
 export function startTelegramBot() {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) {
@@ -43,43 +56,67 @@ export function startTelegramBot() {
 
   bot = new Bot(token);
 
-  // /start — register user
+  // Error handler — log but don't crash
+  bot.catch((err) => {
+    log.error('Telegram bot error:', err.message || err);
+  });
+
+  // /start — register user (also handles deep links like /start premium)
   bot.command('start', async (ctx) => {
     const user = getOrCreateUser(
       String(ctx.from?.id),
       ctx.from?.username,
       ctx.from?.first_name
     );
-    await ctx.reply(
-      `Hey ${user.name || 'there'}! I'm *Jarvis* — your AI job search assistant.\n\n` +
+
+    // Check for deep link payload (e.g. t.me/bot?start=premium)
+    const payload = ctx.match;
+    if (payload === 'premium') {
+      await safeReply(ctx,
+        `Hey ${user.name || 'there'}! You want Premium? Great choice!\n\n` +
+        `Premium Plan — Rs.499/month\n` +
+        `- 50 LinkedIn searches/day\n` +
+        `- 50 LinkedIn messages/day\n` +
+        `- Auto follow-up reminders\n` +
+        `- Gmail integration\n` +
+        `- Resume editing\n\n` +
+        `To activate Premium:\n` +
+        `1. Pay Rs.499 via UPI: abhir0609-3@oksbi\n` +
+        `2. Send the payment screenshot here\n` +
+        `3. I'll activate Premium within minutes!\n\n` +
+        `Or type /start to explore the free plan first.`
+      );
+      return;
+    }
+
+    await safeReply(ctx,
+      `Hey ${user.name || 'there'}! I'm Jarvis — your AI job search assistant.\n\n` +
       `I can help you:\n` +
-      `• Search for recruiters on LinkedIn\n` +
-      `• Send personalized messages\n` +
-      `• Track your outreach & follow-ups\n` +
-      `• Manage job applications\n\n` +
-      `Get started by connecting your LinkedIn:\n` +
-      `/login_linkedin — Connect LinkedIn\n` +
+      `- Search for recruiters on LinkedIn\n` +
+      `- Send personalized messages\n` +
+      `- Track your outreach & follow-ups\n` +
+      `- Manage job applications\n\n` +
+      `Get started:\n` +
+      `/login\\_linkedin — Connect LinkedIn\n` +
       `/plan — View your current plan\n` +
-      `/help — See all commands`,
-      { parse_mode: 'Markdown' }
+      `/help — See all commands`
     );
   });
 
   // /help
   bot.command('help', async (ctx) => {
-    await ctx.reply(
-      `*Jarvis Commands*\n\n` +
-      `/login_linkedin — Connect your LinkedIn account\n` +
+    await safeReply(ctx,
+      `Jarvis Commands\n\n` +
+      `/login\\_linkedin — Connect your LinkedIn account\n` +
       `/plan — View your current plan & usage\n` +
       `/upgrade — Upgrade to Pro or Premium\n` +
       `/stats — Quick job search stats\n` +
       `/help — Show this message\n\n` +
       `Or just type naturally:\n` +
-      `• "Search for recruiters at Google"\n` +
-      `• "Message John about the SWE role"\n` +
-      `• "Show my follow-ups"\n` +
-      `• "Save this job: SWE at Meta"`,
-      { parse_mode: 'Markdown' }
+      `- "Search for recruiters at Google"\n` +
+      `- "Message John about the SWE role"\n` +
+      `- "Show my follow-ups"\n` +
+      `- "Save this job: SWE at Meta"`
     );
   });
 
@@ -89,10 +126,9 @@ export function startTelegramBot() {
       step: 'linkedin_email',
       data: {},
     });
-    await ctx.reply(
-      '🔐 Let\'s connect your LinkedIn account.\n\n' +
-      'Send me your *LinkedIn email address*:',
-      { parse_mode: 'Markdown' }
+    await safeReply(ctx,
+      'Let\'s connect your LinkedIn account.\n\n' +
+      'Send me your LinkedIn email address:'
     );
   });
 
@@ -100,54 +136,37 @@ export function startTelegramBot() {
   bot.command('plan', async (ctx) => {
     const user = getOrCreateUser(String(ctx.from?.id), ctx.from?.username, ctx.from?.first_name);
     const planEmoji = user.plan === 'premium' ? '👑' : user.plan === 'pro' ? '⭐' : '🆓';
-    await ctx.reply(
-      `${planEmoji} *Your Plan: ${user.plan.toUpperCase()}*\n\n` +
+    await safeReply(ctx,
+      `${planEmoji} Your Plan: ${user.plan.toUpperCase()}\n\n` +
       `Searches today: ${user.daily_searches_used}\n` +
       `Messages today: ${user.daily_messages_used}\n` +
       `Status: ${user.subscription_status}\n\n` +
-      (user.plan === 'free' ? 'Use /upgrade to unlock more features!' : 'Enjoying Jarvis? Tell your friends!'),
-      { parse_mode: 'Markdown' }
+      (user.plan === 'free' ? 'Use /upgrade to unlock more features!' : 'Enjoying Jarvis? Tell your friends!')
     );
   });
 
-  // /upgrade — show pricing + Stripe links
+  // /upgrade — show pricing
   bot.command('upgrade', async (ctx) => {
     const user = getOrCreateUser(String(ctx.from?.id), ctx.from?.username, ctx.from?.first_name);
 
     if (user.plan !== 'free') {
-      await ctx.reply(`You're already on the *${user.plan.toUpperCase()}* plan!`, { parse_mode: 'Markdown' });
+      await safeReply(ctx, `You're already on the ${user.plan.toUpperCase()} plan!`);
       return;
     }
 
-    const keyboard = new InlineKeyboard()
-      .text(`⭐ ${PLAN_PRICES.pro.label}`, 'upgrade_pro')
-      .row()
-      .text(`👑 ${PLAN_PRICES.premium.label}`, 'upgrade_premium');
-
-    await ctx.reply(
-      `*Upgrade Jarvis*\n\n` +
-      `⭐ *Pro ($19/mo)*\n` +
-      `• 15 LinkedIn searches/day\n` +
-      `• Send messages to recruiters\n` +
-      `• Gmail integration\n` +
-      `• Follow-up scheduler\n\n` +
-      `👑 *Premium ($49/mo)*\n` +
-      `• 50 LinkedIn searches/day\n` +
-      `• 50 messages/day\n` +
-      `• Resume editing (Overleaf)\n` +
-      `• Priority browser queue\n` +
-      `• Everything in Pro`,
-      { parse_mode: 'Markdown', reply_markup: keyboard }
+    await safeReply(ctx,
+      `Upgrade Jarvis\n\n` +
+      `Premium — Rs.499/month\n` +
+      `- 50 LinkedIn searches/day\n` +
+      `- 50 LinkedIn messages/day\n` +
+      `- Auto follow-up reminders\n` +
+      `- Gmail integration\n` +
+      `- Resume editing (Overleaf)\n\n` +
+      `To upgrade:\n` +
+      `1. Pay Rs.499 via UPI: abhir0609-3@oksbi\n` +
+      `2. Send payment screenshot here\n` +
+      `3. Premium activates within minutes!`
     );
-  });
-
-  // Handle upgrade button clicks
-  bot.callbackQuery('upgrade_pro', async (ctx) => {
-    await handleUpgrade(ctx, 'pro');
-  });
-
-  bot.callbackQuery('upgrade_premium', async (ctx) => {
-    await handleUpgrade(ctx, 'premium');
   });
 
   // /stats — quick stats
@@ -178,31 +197,12 @@ export function startTelegramBot() {
       await sendLongMessage(ctx, response);
     } catch (e: any) {
       log.error('Telegram agent error:', e.message);
-      await ctx.reply('⚠️ Something went wrong. Please try again.');
+      await safeReply(ctx, 'Something went wrong. Please try again.');
     }
   });
 
   bot.start();
   log.info('Telegram bot started');
-}
-
-async function handleUpgrade(ctx: Context, plan: 'pro' | 'premium') {
-  try {
-    const user = getOrCreateUser(
-      String(ctx.from?.id),
-      ctx.from?.username,
-      ctx.from?.first_name
-    );
-    const url = await createCheckoutSession(user.id, plan);
-    await ctx.answerCallbackQuery();
-    await ctx.reply(
-      `💳 Click below to upgrade to *${plan.toUpperCase()}*:\n\n${url}`,
-      { parse_mode: 'Markdown' }
-    );
-  } catch (e: any) {
-    log.error('Stripe checkout error:', e.message);
-    await ctx.answerCallbackQuery({ text: 'Error creating checkout. Try again.' });
-  }
 }
 
 async function handleConversationState(
@@ -215,7 +215,7 @@ async function handleConversationState(
 
   if (text.toLowerCase() === '/cancel') {
     conversationState.delete(telegramId);
-    await ctx.reply('Cancelled.');
+    await safeReply(ctx, 'Cancelled.');
     return;
   }
 
@@ -226,10 +226,9 @@ async function handleConversationState(
       conversationState.set(telegramId, state);
       // Delete the message containing the email for privacy
       try { await ctx.deleteMessage(); } catch (_) {}
-      await ctx.reply(
-        '✅ Got it. Now send your *LinkedIn password*:\n\n' +
-        '_(I will encrypt it and delete this message immediately)_',
-        { parse_mode: 'Markdown' }
+      await safeReply(ctx,
+        'Got it. Now send your LinkedIn password:\n\n' +
+        '(I will encrypt it and delete this message immediately)'
       );
       break;
     }
@@ -247,8 +246,8 @@ async function handleConversationState(
       if (user) {
         const encrypted = encrypt(JSON.stringify({ email, password }));
         updateUser(user.id, { linkedin_credentials: encrypted });
-        await ctx.reply(
-          '🔐 LinkedIn credentials saved securely!\n\n' +
+        await safeReply(ctx,
+          'LinkedIn credentials saved securely!\n\n' +
           'Now try: "Search for recruiters at Google"'
         );
         log.info(`Telegram: LinkedIn credentials saved for user ${user.id}`);
@@ -259,24 +258,17 @@ async function handleConversationState(
 }
 
 async function sendLongMessage(ctx: Context, text: string) {
-  // Telegram's max message length is 4096
   const maxLen = 4000;
   if (text.length <= maxLen) {
-    await ctx.reply(text, { parse_mode: 'Markdown' }).catch(() => {
-      // Fallback without markdown if parsing fails
-      ctx.reply(text);
-    });
+    await safeReply(ctx, text);
     return;
   }
 
-  // Split into chunks
   let remaining = text;
   while (remaining.length > 0) {
     const chunk = remaining.slice(0, maxLen);
     remaining = remaining.slice(maxLen);
-    await ctx.reply(chunk, { parse_mode: 'Markdown' }).catch(() => {
-      ctx.reply(chunk);
-    });
+    await safeReply(ctx, chunk);
     if (remaining.length > 0) {
       await new Promise((r) => setTimeout(r, 300));
     }
@@ -295,8 +287,8 @@ export function stopTelegramBot() {
 export async function sendTelegramMessage(telegramId: string, text: string) {
   if (!bot) return;
   try {
-    await bot.api.sendMessage(telegramId, text, { parse_mode: 'Markdown' }).catch(() => {
-      bot!.api.sendMessage(telegramId, text);
+    await bot.api.sendMessage(telegramId, text).catch((e: any) => {
+      log.error(`Telegram: sendMessage fallback error:`, e.message);
     });
   } catch (e: any) {
     log.error(`Telegram: failed to send to ${telegramId}:`, e.message);

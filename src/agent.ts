@@ -85,11 +85,13 @@ async function callClaude(
       const contentBlocks: any[] = [];
       if (msg.content) contentBlocks.push({ type: 'text', text: msg.content });
       for (const tc of msg.tool_calls) {
+        let parsedInput = {};
+        try { parsedInput = JSON.parse(tc.function.arguments) || {}; } catch { parsedInput = {}; }
         contentBlocks.push({
           type: 'tool_use',
           id: tc.id,
           name: tc.function.name,
-          input: JSON.parse(tc.function.arguments),
+          input: parsedInput,
         });
       }
       anthropicMessages.push({ role: 'assistant', content: contentBlocks });

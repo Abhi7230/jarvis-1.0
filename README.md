@@ -6,71 +6,54 @@ colorTo: purple
 sdk: docker
 app_port: 7860
 pinned: false
+duplicated_from: abhir0609/jarvis
 ---
 
-# Jarvis — Autonomous AI Job Search Agent
+# Jarvis - AI Job Search Agent 🤖
 
-Jarvis is an AI-powered job search agent that runs 24/7 to help you land your next role. It automates recruiter outreach on LinkedIn, tracks conversations, sends follow-ups, and gives you daily progress reports — all through Telegram.
+Your personal AI assistant that automates job search outreach via Telegram.
 
-## Features
+[![Duplicate this Space](https://huggingface.co/datasets/huggingface/badges/resolve/main/duplicate-this-space-xl.svg)](https://huggingface.co/spaces/abhir0609/jarvis?duplicate=true)
 
-- **LinkedIn Automation** — Searches for recruiters matching your criteria and sends personalized messages via browser automation (Playwright)
-- **Smart Follow-ups** — Automatically reminds you about recruiters who haven't replied in 3+ days
-- **Daily Summaries** — Get stats on recruiters found, contacted, replied, and pending follow-ups every evening
-- **Resume Updates** — Edit your Overleaf resume directly through chat (Premium)
-- **Gmail Integration** — Track job application emails (Pro+)
-- **Multi-LLM Fallback** — Uses Groq → Claude → Gemini for reliable AI responses
-- **Multi-User SaaS** — Subscription tiers (Free, Pro, Premium) with Stripe billing
+## One-Click Setup
 
-## How to Use
+1. Click **"Duplicate this Space"** above
+2. Add these secrets in your Space settings:
 
-1. Find the Jarvis bot on Telegram
-2. Send `/start` to begin
-3. Use `/login_linkedin` to connect your LinkedIn account
-4. Chat naturally — e.g. *"Find ML recruiters in San Francisco"* or *"Follow up with anyone who hasn't replied"*
-5. Upgrade with `/upgrade` for more daily searches and messages
+| Secret | How to get it (free) |
+|--------|---------------------|
+| `TELEGRAM_BOT_TOKEN` | Message [@BotFather](https://t.me/BotFather) on Telegram → `/newbot` |
+| `GROQ_API_KEY` | [console.groq.com](https://console.groq.com) (free) |
+| `GEMINI_API_KEY` | [aistudio.google.com](https://aistudio.google.com/apikey) (free) |
+| `ENCRYPTION_KEY` | Run: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `ANTHROPIC_API_KEY` | *(optional, paid)* [console.anthropic.com](https://console.anthropic.com) |
+
+3. Your bot is live! Message it on Telegram.
+
+## What it does
+
+- 🔍 Search LinkedIn for recruiters at any company
+- 💬 Send personalized messages to connections
+- 📊 Track outreach, responses, and follow-ups
+- 🤖 AI-powered with Groq + Gemini + Claude fallback
+- 📅 Auto follow-up reminders
+- 💼 Save and manage job applications
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `/start` | Register and get started |
-| `/help` | See available commands |
-| `/login_linkedin` | Connect your LinkedIn account |
-| `/stats` | View your outreach statistics |
-| `/plan` | See your current subscription plan |
-| `/upgrade` | Upgrade to Pro or Premium |
+- `/start` — Get started
+- `/login_linkedin` — Connect your LinkedIn
+- `/plan` — View your plan & usage
+- `/upgrade` — Upgrade to Pro/Premium
+- `/stats` — View outreach stats
+- `/help` — All commands
+
+Or just type naturally: *"Search for recruiters at Google"*
 
 ## Tech Stack
 
-- **Runtime**: Node.js + TypeScript
-- **Bot Framework**: grammY (Telegram)
-- **Browser Automation**: Playwright (Chromium)
-- **Database**: SQLite (better-sqlite3)
-- **LLMs**: Groq, Anthropic Claude, Google Gemini
-- **Payments**: Stripe
-- **Deployment**: Docker on HuggingFace Spaces
-
-## Self-Hosting
-
-```bash
-# Clone and configure
-cp .env.production.example .env.production
-
-# Run with Docker
-docker compose up -d
-```
-
-## API Endpoints
-
-| Endpoint | Description |
-|----------|-------------|
-| `GET /` | Status landing page |
-| `GET /health` | Health check (`{ status: 'ok', uptime }`) |
-| `POST /webhooks/stripe` | Stripe payment webhook |
-| `GET /payment/success` | Post-payment success page |
-| `GET /payment/cancel` | Post-payment cancel page |
-
-## License
-
-Private — All rights reserved.
+- **Interface**: Telegram Bot (grammY)
+- **LLMs**: Groq (free) → Gemini (free) → Claude (paid fallback)
+- **Automation**: Playwright + Chromium
+- **Database**: SQLite
+- **Hosting**: HuggingFace Spaces (free Docker)
