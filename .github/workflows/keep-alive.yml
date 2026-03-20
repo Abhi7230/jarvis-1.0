@@ -1,0 +1,23 @@
+name: Keep HuggingFace Space Alive
+
+on:
+  schedule:
+    # Ping every 14 minutes (GitHub Actions free tier: 2000 min/month)
+    # 14 min interval = ~3,000 runs/month × ~1s each = ~50 min/month
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping HuggingFace Space
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://abhir0609-jarvis.hf.space/health)
+          echo "Health check response: $response"
+          if [ "$response" != "200" ]; then
+            echo "Space might be sleeping, sending wake-up request..."
+            curl -s https://abhir0609-jarvis.hf.space/ > /dev/null
+            sleep 10
+            curl -s -o /dev/null -w "Retry response: %{http_code}\n" https://abhir0609-jarvis.hf.space/health
+          fi
