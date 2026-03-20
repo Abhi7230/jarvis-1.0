@@ -1,11 +1,11 @@
 FROM node:20-slim
 
-# Install system deps for Playwright Chromium
+# Install system deps for Playwright Chromium + curl for healthcheck
 RUN apt-get update && apt-get install -y \
     libnss3 libatk-bridge2.0-0 libdrm2 libxcomposite1 libxdamage1 \
     libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 libgtk-3-0 \
     libxshmfence1 fonts-noto-color-emoji fonts-freefont-ttf \
-    ca-certificates wget git \
+    ca-certificates wget git curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -36,5 +36,8 @@ ENV WHATSAPP_ENABLED=false
 ENV NODE_ENV=production
 
 EXPOSE 7860
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:7860/health || exit 1
 
 CMD ["node", "dist/index.js"]
