@@ -56,14 +56,11 @@ export function startTelegramBot() {
 
   bot = new Bot(token);
 
-<<<<<<< Updated upstream
-=======
   // Error handler — log but don't crash
   bot.catch((err) => {
     log.error('Telegram bot error:', err.message || err);
   });
 
->>>>>>> Stashed changes
   // /start — register user (also handles deep links like /start premium)
   bot.command('start', async (ctx) => {
     const user = getOrCreateUser(
@@ -75,22 +72,6 @@ export function startTelegramBot() {
     // Check for deep link payload (e.g. t.me/bot?start=premium)
     const payload = ctx.match;
     if (payload === 'premium') {
-<<<<<<< Updated upstream
-      await ctx.reply(
-        `Hey ${user.name || 'there'}! You want *Premium*? Great choice!\n\n` +
-        `*Premium Plan — ₹499/month*\n` +
-        `• 50 LinkedIn searches/day\n` +
-        `• 50 LinkedIn messages/day\n` +
-        `• Auto follow-up reminders\n` +
-        `• Gmail integration\n` +
-        `• Resume editing\n\n` +
-        `To activate Premium:\n` +
-        `1. Pay ₹499 via UPI: *abhir0609-3@oksbi*\n` +
-        `2. Send the payment screenshot here\n` +
-        `3. I'll activate Premium within minutes!\n\n` +
-        `Or type /start to explore the free plan first.`,
-        { parse_mode: 'Markdown' }
-=======
       await safeReply(ctx,
         `Hey ${user.name || 'there'}! You want Premium? Great choice!\n\n` +
         `Premium Plan — Rs.499/month\n` +
@@ -104,18 +85,12 @@ export function startTelegramBot() {
         `2. Send the payment screenshot here\n` +
         `3. I'll activate Premium within minutes!\n\n` +
         `Or type /start to explore the free plan first.`
->>>>>>> Stashed changes
       );
       return;
     }
 
-<<<<<<< Updated upstream
-    await ctx.reply(
-      `Hey ${user.name || 'there'}! I'm *Jarvis* — your AI job search assistant.\n\n` +
-=======
     await safeReply(ctx,
       `Hey ${user.name || 'there'}! I'm Jarvis — your AI job search assistant.\n\n` +
->>>>>>> Stashed changes
       `I can help you:\n` +
       `- Search for recruiters on LinkedIn\n` +
       `- Send personalized messages\n` +

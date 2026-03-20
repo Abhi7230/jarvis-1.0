@@ -4,6 +4,8 @@ import { handleWebhook } from './stripe';
 import { getLandingHTML } from './landing';
 import { log } from './logger';
 
+let keepAliveHandle: ReturnType<typeof setInterval> | null = null;
+
 export function startHttpServer(port: number = 3000) {
   const app = express();
 
@@ -60,7 +62,34 @@ export function startHttpServer(port: number = 3000) {
 
   app.listen(port, () => {
     log.info(`HTTP server listening on port ${port}`);
+
+    // Self-ping every 5 minutes to prevent HuggingFace Spaces from sleeping
+    startKeepAlive(port);
   });
 
   return app;
+}
+
+function startKeepAlive(port: number) {
+  const KEEP_ALIVE_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+  keepAliveHandle = setInterval(async () => {
+    try {
+      const res = await fetch(`http://localhost:${port}/health`);
+      if (res.ok) {
+        log.info('Keep-alive ping: OK');
+      }
+    } catch {
+      log.warn('Keep-alive ping failed');
+    }
+  }, KEEP_ALIVE_INTERVAL);
+
+  log.info('Keep-alive started (pinging every 5 min)');
+}
+
+export function stopKeepAlive() {
+  if (keepAliveHandle) {
+    clearInterval(keepAliveHandle);
+    keepAliveHandle = null;
+  }
 }

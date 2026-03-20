@@ -6,7 +6,7 @@ import { runAgent } from './agent';
 import { startScheduler, startMultiUserScheduler, stopScheduler } from './scheduler';
 import { closeAllBrowsers } from './browser-pool';
 import { startTelegramBot, stopTelegramBot } from './telegram';
-import { startHttpServer } from './http';
+import { startHttpServer, stopKeepAlive } from './http';
 import { buildUserContext } from './context';
 import { log } from './logger';
 
@@ -85,6 +85,7 @@ async function main() {
 // ── Graceful shutdown ──
 async function shutdown(signal: string) {
   log.info(`Received ${signal}. Shutting down gracefully...`);
+  stopKeepAlive();
   stopScheduler();
   stopTelegramBot();
   await closeAllBrowsers();
